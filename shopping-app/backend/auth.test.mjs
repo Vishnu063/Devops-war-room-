@@ -10,3 +10,6 @@ test("session token is random and hashed for storage",()=>{const a=newSessionTok
 test("public profile excludes password hash",()=>{assert.deepEqual(publicUser({id:"1",email:"demo@example.com",name:"Demo",role:"CUSTOMER",password_hash:"secret"}),{id:"1",email:"demo@example.com",name:"Demo",role:"CUSTOMER"})});
 
 test("dummy digest still performs password verification",async()=>{const dummy="scrypt$00000000000000000000000000000000$"+("00".repeat(64));assert.equal(await verifyPassword("unknown-account-password",dummy),false)});
+
+test("missing registration body returns validation error",async()=>{const {registerCustomer}=await import("./auth.mjs");await assert.rejects(registerCustomer(),/Invalid email/)});
+test("missing login body returns validation error",async()=>{const {authenticateCustomer}=await import("./auth.mjs");await assert.rejects(authenticateCustomer(),/Invalid email/)});
