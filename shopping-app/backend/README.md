@@ -1,6 +1,6 @@
 # NovaCart development API
 
-This is a **demo-only**, dependency-free Node.js HTTP service for validating catalog and quote logic. It is not the production backend and does not persist orders, process payments, authenticate users or reserve inventory.
+This is a **demo-only**, Node.js HTTP service for validating catalog and quote logic. It is not the production backend and does not persist orders, process payments, or reserve inventory. Database-backed development authentication is available but unverified.
 
 ## Run locally
 Requires Node.js 20+. Run `npm install` inside `shopping-app/backend` before starting; the PostgreSQL driver is required even in demo mode.
@@ -14,9 +14,9 @@ API binds to 127.0.0.1:3100 by default, not a public interface.
 
 ## PostgreSQL development mode
 
-The API uses fictional in-memory products when `DATABASE_URL` is unset. When `DATABASE_URL` is configured, catalog listing and cart quotes use parameterized PostgreSQL queries. No database-backed order creation or authentication exists yet.
+The API uses fictional in-memory products when `DATABASE_URL` is unset. When `DATABASE_URL` is configured, catalog listing and cart quotes use parameterized PostgreSQL queries. Database-backed development authentication exists; order creation is not implemented.
 
-To initialize a **disposable development database only**, review `../data-model.sql`, set `DATABASE_URL`, then set `CONFIRM_DEMO_SCHEMA=yes` and run `npm run db:migrate`. The SQL draft is not a production-ready versioned migration. Never apply it to an existing production database.
+To initialize a **disposable development database only**, review `../data-model.sql`, set `DATABASE_URL`, then set `CONFIRM_DEMO_SCHEMA=yes` and run `npm run db:migrate`. Development schema migrations are version-tracked, but are not production-ready. Never apply it to an existing production database.
 
 Database mode quotes use `variantId` rather than demo `id`. The browser demo checkout is separate and does not communicate with this API.
 
@@ -28,17 +28,17 @@ Database mode quotes use `variantId` rather than demo `id`. The browser demo che
 
 All prices are calculated from server-side demo data in integer paise. Invalid quantity, duplicate lines and insufficient stock are rejected. Administrative, order-creation and payment routes return 403.
 
-**Do not deploy this demo API publicly or use it for actual orders.** Persistent PostgreSQL implementation, authentication, stock reservations, payment provider adapters and tests are still required.
+**Do not deploy this demo API publicly or use it for actual orders.** Production-grade PostgreSQL integration, stock reservations, payment provider adapters and executed tests are still required.
 
 ## Authentication development endpoints
 
-Database mode adds `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, and `GET /api/auth/me`. Registration accepts `{"email":"demo@example.com","password":"at-least-12-characters","name":"Demo User"}` and always creates a CUSTOMER account; callers cannot set OWNER roles. Login and registration create a database-backed session using a hashed token and an HttpOnly cookie. Apply `auth-schema.sql` **after** the base schema on a disposable database before using these endpoints.
+Database mode adds `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, and `GET /api/auth/me`. Registration accepts `{"email":"demo@example.com","password":"at-least-12-characters","name":"Demo User"}` and always creates a CUSTOMER account; callers cannot set OWNER roles. Login and registration create a database-backed session using a hashed token and an HttpOnly cookie. The development migration command applies the base and authentication schemas on a fresh disposable database.
 
-**Not production-ready:** no account verification, password recovery, login throttling, CSRF token strategy, owner provisioning, security review or integration tests against PostgreSQL. Do not expose this API to the public internet. The static storefront has not been connected to authentication.
+**Not production-ready:** no account verification, password recovery, shared-store login throttling, comprehensive CSRF protection, production owner provisioning, security review or integration tests against PostgreSQL. Do not expose this API to the public internet. The static storefront has not been connected to authentication.
 
 ## Owner-only catalog API (development)
 
-With PostgreSQL and authentication configured, OWNER sessions may use `GET /api/admin/products`, `POST /api/admin/products`, and `PATCH /api/admin/products/:id`. Mutations require same-origin JSON requests and record audit events. Creation requires `name`, `slug`, `categorySlug`, `sku`, `pricePaise` and `stock`. New products remain unpublished until explicitly activated. Product edits currently target the first matching variant and therefore are **not ready for multi-variant products**. No public owner registration is supported. Do not use these endpoints for real commerce until database integration tests, owner provisioning and security review are complete.
+With PostgreSQL and authentication configured, OWNER sessions may use `GET /api/admin/products`, `POST /api/admin/products`, and `PATCH /api/admin/products/:id`. Mutations require same-origin JSON requests and record audit events. Creation requires `name`, `slug`, `categorySlug`, `sku`, `pricePaise` and `stock`. New products default to draft; an OWNER can explicitly set `active: true` during creation. Product edits reject products with multiple variants and therefore are **not ready for multi-variant products**. No public owner registration is supported. Do not use these endpoints for real commerce until database integration tests, owner provisioning and security review are complete.
 
 ## Verification checklist (not yet completed)
 
