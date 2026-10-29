@@ -2,7 +2,7 @@
 const attempts=new Map();
 export function checkRateLimit(key,{max=8,windowMs=15*60*1000}={}){
  const now=Date.now();
- if(attempts.size>10000){for(const [k,v] of attempts)if(v.reset<=now)attempts.delete(k)}
+ if(attempts.size>=10000){for(const [k,v] of attempts)if(v.reset<=now)attempts.delete(k);if(attempts.size>=10000)attempts.delete(attempts.keys().next().value)}
  const state=attempts.get(key);
  if(!state||state.reset<=now){attempts.set(key,{count:1,reset:now+windowMs});return {allowed:true,retryAfter:0}}
  state.count++;
