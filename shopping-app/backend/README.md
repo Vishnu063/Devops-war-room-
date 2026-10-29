@@ -49,7 +49,7 @@ $ cd shopping-app/backend
 $ npm install
 $ npm test
 $ CONFIRM_DEMO_SCHEMA=yes npm run db:migrate
-$ CONFIRM_DEMO_SEED=yes npm run db:seed-demo
+$ NODE_ENV=development CONFIRM_DEMO_SEED=yes npm run db:seed-demo
 $ npm start
 ```
 
