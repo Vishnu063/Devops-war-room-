@@ -23,3 +23,12 @@ test("JSON content type allows charset parameter",()=>{
  assert.equal(requireJson({headers:{"content-type":"application/json; charset=utf-8"}}),true);
  assert.equal(requireJson({headers:{}}),false);
 });
+
+test("rate limiter resets after the configured window",()=>{
+ const key="window-test-"+Math.random();
+ assert.equal(checkRateLimit(key,{max:1,windowMs:0}).allowed,true);
+ assert.equal(checkRateLimit(key,{max:1,windowMs:0}).allowed,true);
+});
+test("origin comparison rejects a different port",()=>{
+ assert.equal(verifySameOrigin({headers:{host:"localhost:3100",origin:"http://localhost:3101"}}),false);
+});
