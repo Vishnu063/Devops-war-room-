@@ -14,3 +14,12 @@ test("JSON content type",()=>{
  assert.equal(requireJson({headers:{"content-type":"application/json"}}),true);
  assert.equal(requireJson({headers:{"content-type":"text/plain"}}),false);
 });
+
+test("origin validation rejects absent and malformed origins",()=>{
+ assert.equal(verifySameOrigin({headers:{host:"localhost:3100"}}),false);
+ assert.equal(verifySameOrigin({headers:{host:"localhost:3100",origin:"not-a-url"}}),false);
+});
+test("JSON content type allows charset parameter",()=>{
+ assert.equal(requireJson({headers:{"content-type":"application/json; charset=utf-8"}}),true);
+ assert.equal(requireJson({headers:{}}),false);
+});
