@@ -1,5 +1,7 @@
 // NovaCart development-only HTTP API. No production checkout, credentials or customer PII.
 import {createServer} from "node:http";
+import {readFile} from "node:fs/promises";
+import {extname} from "node:path";
 import {fileURLToPath} from "node:url";
 import {listProducts,products,quoteCart} from "./catalog.mjs";
 import {findProducts,quoteDatabaseCart} from "./repository.mjs";
@@ -14,6 +16,13 @@ async function readJson(req){let text="";for await(const chunk of req){text+=chu
 export const server=createServer(async(req,res)=>{
 try{
 const url=new URL(req.url,"http://localhost");const method=req.method;
+if(method==="GET"&&["/admin","/admin.html","/admin.css","/admin.js"].includes(url.pathname)){
+ const name=url.pathname==="/admin"?"admin.html":url.pathname.slice(1);
+ const file=new URL("../"+name,import.meta.url);
+ const bytes=await readFile(file);
+ res.writeHead(200,{"content-type":name.endsWith(".css")?"text/css; charset=utf-8":name.endsWith(".js")?"text/javascript; charset=utf-8":"text/html; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff","content-security-policy":"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"});
+ res.end(bytes);return;
+}
 if(url.pathname.startsWith("/api/auth/")){
  if(!process.env.DATABASE_URL)return send(res,403,{error:"Authentication requires a configured database"});
  if(method==="GET"&&url.pathname==="/api/auth/me"){const user=await currentUser(req);return user?send(res,200,{user}):send(res,401,{error:"Not authenticated"})}
