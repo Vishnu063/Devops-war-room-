@@ -14,3 +14,7 @@ test("reject malformed stock update",()=>assert.throws(()=>validatePatch({stock:
 
 test("valid publish toggle",()=>assert.equal(validatePatch({active:true}).active,true));
 test("reject nonboolean publish toggle",()=>assert.throws(()=>validatePatch({active:"true"})));
+
+test("new products default to draft",()=>assert.equal(validateProduct(item).active,false));
+test("new products can be published",()=>assert.equal(validateProduct({...item,active:true}).active,true));
+test("reject nonboolean initial publication",()=>assert.throws(()=>validateProduct({...item,active:"true"})));
