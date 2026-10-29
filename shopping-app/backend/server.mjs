@@ -48,6 +48,6 @@ const adminResponse=await handleAdminProducts(req,url.pathname,readJson);
 if(adminResponse)return send(res,adminResponse.status,adminResponse.data);
 if(url.pathname.startsWith("/api/admin")||url.pathname==="/api/orders"||url.pathname.startsWith("/api/payments"))return send(res,403,{error:"Unavailable in demo mode"});
 return send(res,404,{error:"Not found"});
-}catch(e){const known=e instanceof Error&&(/^(Invalid|Cart |Duplicate |Unknown |Insufficient |Stock |Total |Request too large|Password must|Account already exists|Forbidden|Product not found|Category not found|Multi-variant editing)/.test(e.message));const status=Number.isInteger(e?.status)?e.status:known?400:500;const safe=status>=500?"Internal server error":e instanceof Error?e.message:"Bad request";return send(res,status,{error:safe})}
+}catch(e){const known=e instanceof Error&&(/^(Invalid|Cart |Duplicate |Unknown |Insufficient |Stock |Total |Request too large|Password must|Account already exists|Forbidden|Product not found|Category not found|Multi-variant editing)/.test(e.message));const status=e?.code==="23505"?409:Number.isInteger(e?.status)?e.status:known?400:500;const safe=status>=500?"Internal server error":e?.code==="23505"?"A record with this identifier already exists":e instanceof Error?e.message:"Bad request";return send(res,status,{error:safe})}
 });
 if(process.argv[1]&&fileURLToPath(import.meta.url)===process.argv[1])server.listen(port,"127.0.0.1",()=>console.log("NovaCart DEMO API on http://127.0.0.1:"+port));
