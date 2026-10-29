@@ -1,0 +1,11 @@
+import test from "node:test";import assert from "node:assert/strict";
+import {listProducts,quoteCart,products} from "./catalog.mjs";
+test("catalog has eight unique fictional products",()=>{assert.equal(products.length,8);assert.equal(new Set(products.map(p=>p.sku)).size,8)});
+test("search and category filters",()=>{assert.equal(listProducts({search:"headphones"}).total,1);assert.equal(listProducts({category:"Tech"}).total,2)});
+test("sorting and pagination",()=>{const r=listProducts({sort:"priceAsc",page:1,limit:2});assert.equal(r.items.length,2);assert.ok(r.items[0].pricePaise<=r.items[1].pricePaise)});
+test("server-side totals are calculated in paise",()=>{const q=quoteCart([{id:"p4",quantity:2}]);assert.equal(q.subtotalPaise,259800);assert.equal(q.shippingPaise,0);assert.equal(q.totalPaise,259800)});
+test("empty cart is rejected",()=>assert.throws(()=>quoteCart([])));
+test("duplicate lines are rejected",()=>assert.throws(()=>quoteCart([{id:"p1",quantity:1},{id:"p1",quantity:1}])));
+test("unknown items are rejected",()=>assert.throws(()=>quoteCart([{id:"unknown",quantity:1}])));
+test("stock is checked",()=>assert.throws(()=>quoteCart([{id:"p1",quantity:16}])));
+test("invalid quantities are rejected",()=>{for(const quantity of [-1,0,1.2,100,"2"])assert.throws(()=>quoteCart([{id:"p1",quantity}]))});
