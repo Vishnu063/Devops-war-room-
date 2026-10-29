@@ -27,6 +27,8 @@ test("demo API returns catalog and refuses orders",async()=>{
   assert.equal(missingItems.status,400);
   const badPagination=await fetch(base+"/api/products?page=0");
   assert.equal(badPagination.status,400);
+  const oversizedBody=await fetch(base+"/api/checkout/quote",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({padding:"x".repeat(17000)})});
+  assert.equal(oversizedBody.status,400);
   const missingProduct=await fetch(base+"/api/products/not-real");
   assert.equal(missingProduct.status,404);
   const authWithoutDatabase=await fetch(base+"/api/auth/me");
