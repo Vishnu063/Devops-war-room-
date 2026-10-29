@@ -5,6 +5,7 @@ import {listProducts,products,quoteCart} from "./catalog.mjs";
 import {findProducts,quoteDatabaseCart} from "./repository.mjs";
 import {registerCustomer,authenticateCustomer,requireRole} from "./auth.mjs";
 import {createSession,currentUser,revokeSession,sessionCookie,clearSessionCookie} from "./sessions.mjs";
+import {checkRateLimit,verifySameOrigin,requireJson,clientAddress} from "./security.mjs";
 const port=Number(process.env.PORT||3100);
 const maxBytes=16*1024;
 function send(res,status,data){const body=JSON.stringify(data);res.writeHead(status,{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff","x-frame-options":"DENY","content-security-policy":"default-src 'none'"});res.end(body)}
@@ -18,8 +19,9 @@ if(url.pathname.startsWith("/api/auth/")){
  if(method==="POST"&&["/api/auth/register","/api/auth/login","/api/auth/logout"].includes(url.pathname)){
   const origin=req.headers.origin;
   const host=req.headers.host;
-  if(origin&&new URL(origin).host!==host)return send(res,403,{error:"Cross-origin request denied"});
-  if(req.headers["content-type"]?.split(";")[0]?.trim()!=="application/json")return send(res,415,{error:"JSON required"});
+  if(!verifySameOrigin(req))return send(res,403,{error:"Cross-origin request denied"});
+  if(!requireJson(req))return send(res,415,{error:"JSON required"});
+  if(url.pathname!=="/api/auth/logout"){const rate=checkRateLimit("auth:"+clientAddress(req));if(!rate.allowed)return send(res,429,{error:"Too many attempts"})}
   if(url.pathname==="/api/auth/logout"){await revokeSession(req);res.setHeader("Set-Cookie",clearSessionCookie({secure:process.env.NODE_ENV==="production"}));return send(res,200,{ok:true})}
   const body=await readJson(req);
   const user=url.pathname==="/api/auth/register"?await registerCustomer(body):await authenticateCustomer(body);
