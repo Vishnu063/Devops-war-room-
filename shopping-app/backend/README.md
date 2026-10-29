@@ -54,3 +54,13 @@ $ npm start
 ```
 
 Migration tracking now records schema versions 1 and 2; use a fresh database for first verification. Existing databases created before tracking require manual reconciliation. The admin page is at `http://127.0.0.1:3100/admin`. Verify OWNER login, draft creation, price/stock edits, publication changes, rejection of CUSTOMER sessions, and logout. No production payment, order processing, or owner-account provisioning is implemented.
+
+### Development owner account
+
+Register a customer through the same-origin API first. On a disposable development database, explicitly promote that existing account:
+
+```sh
+$ OWNER_EMAIL=owner@example.test CONFIRM_OWNER_PROVISION=yes npm run db:provision-owner
+```
+
+Replace the example email with your actual test account. This command is disabled when `NODE_ENV=production`; it does not create a password or expose a public owner-registration endpoint. Sign in at `/admin` after provisioning.
