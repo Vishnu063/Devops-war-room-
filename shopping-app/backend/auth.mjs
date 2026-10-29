@@ -30,7 +30,7 @@ export function publicUser(user){return {id:user.id,email:user.email,name:user.n
 export function requireRole(user,...allowed){if(!user||!allowed.includes(user.role))throw Object.assign(new Error("Forbidden"),{status:403})}
 export function newSessionToken(){return randomBytes(32).toString("base64url")}
 export function sessionDigest(token){return createHash("sha256").update(token).digest("hex")}
-export async function registerCustomer({email,password,name}){
+export async function registerCustomer({email,password,name}={}){
  const cleanEmail=normalizeEmail(email);const cleanPassword=validatePassword(password);
  if(typeof name!=="string"||name.trim().length<2||name.trim().length>100)throw new Error("Invalid name");
  const hashed=await hashPassword(cleanPassword);
@@ -38,7 +38,7 @@ export async function registerCustomer({email,password,name}){
  if(!result.rows.length)throw Object.assign(new Error("Account already exists"),{status:409});
  return publicUser(result.rows[0]);
 }
-export async function authenticateCustomer({email,password}){
+export async function authenticateCustomer({email,password}={}){
  const cleanEmail=normalizeEmail(email);
  if(typeof password!=="string")throw new Error("Invalid credentials");
  const result=await database().query("SELECT id,email,name,role,password_hash FROM users WHERE lower(email)=$1 AND deleted_at IS NULL LIMIT 1",[cleanEmail]);
