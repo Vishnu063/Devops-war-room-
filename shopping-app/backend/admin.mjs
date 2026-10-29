@@ -48,7 +48,7 @@ export async function updateAdminProduct(id,patch,actorId){
   const existing=await db.query("SELECT p.id,v.id AS variant_id,v.stock_reserved FROM products p JOIN variants v ON v.product_id=p.id WHERE p.id=$1 FOR UPDATE OF p,v",[id]);
   if(existing.rows.length>1)throw Object.assign(new Error("Multi-variant editing is not supported yet"),{status:409});
   if(!existing.rows.length)throw Object.assign(new Error("Product not found"),{status:404});
-  if("stock" in data&&data.stock<existing.rows[0].stock_reserved)throw new Error("Stock cannot be below reserved inventory");
+  if("stock" in data&&data.stock<existing.rows[0].stock_reserved)throw Object.assign(new Error("Stock cannot be below reserved inventory"),{status:409});
   const productUpdates=[],productValues=[];
   for(const [field,col] of [["name","title"],["description","description"],["active","active"]])if(field in data){productValues.push(field==="name"?data[field].trim():data[field]);productUpdates.push(col+"=$"+productValues.length)}
   if(productUpdates.length){productValues.push(id);await db.query("UPDATE products SET "+productUpdates.join(",")+",updated_at=now() WHERE id=$"+productValues.length,productValues)}
