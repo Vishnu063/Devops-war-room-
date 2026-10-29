@@ -18,3 +18,9 @@ test("reject nonboolean publish toggle",()=>assert.throws(()=>validatePatch({act
 test("new products default to draft",()=>assert.equal(validateProduct(item).active,false));
 test("new products can be published",()=>assert.equal(validateProduct({...item,active:true}).active,true));
 test("reject nonboolean initial publication",()=>assert.throws(()=>validateProduct({...item,active:"true"})));
+
+test("reject unsafe integer product prices",()=>assert.throws(()=>validateProduct({...item,pricePaise:Number.MAX_SAFE_INTEGER})));
+test("reject excessive product stock",()=>assert.throws(()=>validateProduct({...item,stock:1000001})));
+test("reject invalid product SKU characters",()=>assert.throws(()=>validateProduct({...item,sku:"demo sku"})));
+test("reject unsupported price patch types",()=>assert.throws(()=>validatePatch({pricePaise:"10000"})));
+test("reject product ID with invalid UUID version",()=>assert.equal(validProductId("123e4567-e89b-02d3-a456-426614174000"),false));
