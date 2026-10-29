@@ -3,6 +3,7 @@ import {fileURLToPath} from "node:url";
 import {database,closeDatabase} from "./db.mjs";
 const migration=fileURLToPath(new URL("../data-model.sql",import.meta.url));
 async function main(){
+  if(process.env.NODE_ENV!=="development")throw new Error("Development mode required");
   if(process.env.CONFIRM_DEMO_SCHEMA!=="yes")throw new Error("Set CONFIRM_DEMO_SCHEMA=yes to apply the schema to a disposable development database");
   const sql=await readFile(migration,"utf8");
   const authSql=await readFile(new URL("./auth-schema.sql",import.meta.url),"utf8");
