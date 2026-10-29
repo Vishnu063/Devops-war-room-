@@ -1,16 +1,11 @@
-# DEVOPS WAR ROOM
+# NovaCart
 
-Responsive, self-contained DevOps interview simulator for mobile, tablet, laptop and desktop.
+Premium India-first general shopping website under development.
 
-## Run
-Open index.html in any modern browser. No server, install, credentials, or AWS resources needed.
+The repository root opens the NovaCart storefront in [shopping-app](./shopping-app/).
 
-## Features
-- Eight interactive incidents: Kubernetes, AWS, networking, GitOps
-- Simulated terminal (does not run commands on real infrastructure)
-- Explanation after each choice
-- XP, ranks, and browser-local progress
-- Responsive layouts and touch-friendly controls
+- [Application preview source](./shopping-app/index.html)
+- [Full 30-step roadmap](./shopping-app/ROADMAP.md)
+- [Implementation status and instructions](./shopping-app/README.md)
 
-## Safety
-This is an educational simulation. It never connects to AWS, Kubernetes or a production cluster.
+**Status:** Frontend prototype only. No real orders or payments are accepted. DevOps, deployment and hosting remain the owner's responsibility.
