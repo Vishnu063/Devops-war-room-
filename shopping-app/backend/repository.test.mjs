@@ -19,3 +19,11 @@ test("catalog rejects invalid pagination without connecting",async()=>{
  await assert.rejects(findProducts({page:0}),/Invalid pagination/);
  await assert.rejects(findProducts({limit:51}),/Invalid pagination/);
 });
+
+test("database quote rejects carts with more than 50 lines",async()=>{
+ const lines=Array.from({length:51},(_,i)=>({variantId:"123e4567-e89b-42d3-a456-426614174000",quantity:i+1}));
+ await assert.rejects(quoteDatabaseCart(lines),/Cart must contain/);
+});
+test("database quote rejects fractional quantities",async()=>{
+ await assert.rejects(quoteDatabaseCart([{variantId:"123e4567-e89b-42d3-a456-426614174000",quantity:1.5}]),/Invalid cart line/);
+});
