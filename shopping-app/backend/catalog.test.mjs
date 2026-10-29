@@ -9,3 +9,11 @@ test("duplicate lines are rejected",()=>assert.throws(()=>quoteCart([{id:"p1",qu
 test("unknown items are rejected",()=>assert.throws(()=>quoteCart([{id:"unknown",quantity:1}])));
 test("stock is checked",()=>assert.throws(()=>quoteCart([{id:"p1",quantity:16}])));
 test("invalid quantities are rejected",()=>{for(const quantity of [-1,0,1.2,100,"2"])assert.throws(()=>quoteCart([{id:"p1",quantity}]))});
+
+test("shipping applies below the free-shipping threshold",()=>{
+ const q=quoteCart([{id:"p4",quantity:1}]);
+ assert.equal(q.shippingPaise,0);
+});
+test("demo catalog returns no results for an unknown search",()=>{
+ assert.equal(listProducts({search:"no-such-product-123"}).total,0);
+});
