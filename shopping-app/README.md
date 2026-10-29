@@ -8,14 +8,14 @@ NovaCart is a premium India-first general shopping website under active developm
 - Premium responsive customer experience.
 - Online payment and cash-on-delivery **planned**, not yet implemented.
 - Owner-only Master Control Panel **planned**, not yet implemented.
-- DevOps War Room remains untouched in the repository root.
+- NovaCart replaces the former DevOps War Room application in the repository root.
 
 ## Current milestone: storefront prototype
 
 Implemented:
 - Responsive homepage, category navigation, product collection, and brand section
 - Demo catalog with eight illustrative products and INR pricing
-- Client-side product search and category filters
+- Client-side product search, category filters, price/name sorting, and product detail dialogs
 - Wishlist and cart with browser-local persistence
 - Cart subtotal and a clearly disabled checkout
 - Keyboard-friendly controls and basic semantic HTML
@@ -33,6 +33,15 @@ Open `shopping-app/index.html` in a browser. This is a frontend-only prototype a
 
 Application code, design, business logic and tests: application development scope.
 Infrastructure, hosting, deployment, CI/CD and DevOps: repository owner's scope.
+
+## Architecture artifacts
+
+- [30-step implementation plan](./ROADMAP.md)
+- [Application architecture](./ARCHITECTURE.md)
+- [PostgreSQL schema draft](./data-model.sql)
+- [Security requirements](./SECURITY.md)
+
+The schema is not deployed and no production API exists. The storefront uses sample data and externally hosted illustrative images.
 
 ## Next milestone
 
