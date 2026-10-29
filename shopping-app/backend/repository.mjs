@@ -27,7 +27,7 @@ export async function quoteDatabaseCart(lines){
  const seen=new Set(),requested=[];
  for(const line of lines){
   if(!line||typeof line.variantId!=="string"||!Number.isInteger(line.quantity)||line.quantity<1||line.quantity>99)throw new Error("Invalid cart line");
-  if(line.variantId.length>80)throw new Error("Invalid cart line");
+  if(!/^[0-9a-f-]{36}$/i.test(line.variantId))throw new Error("Invalid cart line");
   if(seen.has(line.variantId))throw new Error("Duplicate variant");
   seen.add(line.variantId);requested.push(line.variantId);
  }
