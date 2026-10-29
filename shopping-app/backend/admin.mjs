@@ -3,7 +3,7 @@ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]
 const slug=/^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export function validateProduct(input){
  if(!input||typeof input!=="object"||Array.isArray(input))throw new Error("Invalid product");
- const {name,slug:productSlug,description="",categorySlug,sku,pricePaise,stock}=input;
+ const {name,slug:productSlug,description="",categorySlug,sku,pricePaise,stock,active=false}=input;
  if(typeof name!=="string"||name.trim().length<3||name.trim().length>150)throw new Error("Invalid product name");
  if(typeof productSlug!=="string"||productSlug.length>100||!slug.test(productSlug))throw new Error("Invalid product slug");
  if(typeof description!=="string"||description.length>5000)throw new Error("Invalid description");
@@ -11,7 +11,8 @@ export function validateProduct(input){
  if(typeof sku!=="string"||sku.length<3||sku.length>80||!/^[A-Z0-9_-]+$/.test(sku))throw new Error("Invalid SKU");
  if(!Number.isSafeInteger(pricePaise)||pricePaise<0||pricePaise>100000000000)throw new Error("Invalid price");
  if(!Number.isInteger(stock)||stock<0||stock>1000000)throw new Error("Invalid stock");
- return {name:name.trim(),slug:productSlug,description,categorySlug,sku,pricePaise,stock};
+ if(typeof active!=="boolean")throw new Error("Invalid active flag");
+ return {name:name.trim(),slug:productSlug,description,categorySlug,sku,pricePaise,stock,active};
 }
 export function validatePatch(input){
  if(!input||typeof input!=="object"||Array.isArray(input))throw new Error("Invalid update");
@@ -34,10 +35,10 @@ export async function createAdminProduct(input,actorId){
  return transaction(async db=>{
   const category=await db.query("SELECT id FROM categories WHERE slug=$1",[p.categorySlug]);
   if(!category.rows.length)throw Object.assign(new Error("Category not found"),{status:404});
-  const product=await db.query("INSERT INTO products(category_id,slug,title,description,active) VALUES($1,$2,$3,$4,FALSE) RETURNING id",[category.rows[0].id,p.slug,p.name,p.description]);
+  const product=await db.query("INSERT INTO products(category_id,slug,title,description,active) VALUES($1,$2,$3,$4,$5) RETURNING id",[category.rows[0].id,p.slug,p.name,p.description,p.active]);
   const variant=await db.query("INSERT INTO variants(product_id,sku,price_paise,stock_on_hand) VALUES($1,$2,$3,$4) RETURNING id",[product.rows[0].id,p.sku,p.pricePaise,p.stock]);
   await db.query("INSERT INTO audit_events(actor_id,action,entity_type,entity_id) VALUES($1,'PRODUCT_CREATED','PRODUCT',$2)",[actorId,String(product.rows[0].id)]);
-  return {id:product.rows[0].id,variantId:variant.rows[0].id,active:false};
+  return {id:product.rows[0].id,variantId:variant.rows[0].id,active:p.active};
  });
 }
 export async function updateAdminProduct(id,patch,actorId){
