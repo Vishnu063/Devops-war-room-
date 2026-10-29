@@ -2,7 +2,7 @@ import {randomBytes,scrypt as scryptCallback,timingSafeEqual,createHash} from "n
 import {promisify} from "node:util";
 import {database} from "./db.mjs";
 const scrypt=promisify(scryptCallback);
-const DUMMY="novacart:invalid";
+const DUMMY="scrypt$00000000000000000000000000000000$"+("00".repeat(64));
 export function normalizeEmail(email){
  if(typeof email!=="string")throw new Error("Invalid email");
  const value=email.trim().toLowerCase();
