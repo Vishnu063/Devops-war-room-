@@ -1,7 +1,6 @@
 // NovaCart development-only HTTP API. No production checkout, credentials or customer PII.
 import {createServer} from "node:http";
 import {readFile} from "node:fs/promises";
-import {extname} from "node:path";
 import {fileURLToPath} from "node:url";
 import {listProducts,products,quoteCart} from "./catalog.mjs";
 import {findProducts,quoteDatabaseCart} from "./repository.mjs";
@@ -27,8 +26,6 @@ if(url.pathname.startsWith("/api/auth/")){
  if(!process.env.DATABASE_URL)return send(res,403,{error:"Authentication requires a configured database"});
  if(method==="GET"&&url.pathname==="/api/auth/me"){const user=await currentUser(req);return user?send(res,200,{user}):send(res,401,{error:"Not authenticated"})}
  if(method==="POST"&&["/api/auth/register","/api/auth/login","/api/auth/logout"].includes(url.pathname)){
-  const origin=req.headers.origin;
-  const host=req.headers.host;
   if(!verifySameOrigin(req))return send(res,403,{error:"Cross-origin request denied"});
   if(!requireJson(req))return send(res,415,{error:"JSON required"});
   if(url.pathname!=="/api/auth/logout"){const rate=checkRateLimit("auth:"+clientAddress(req));if(!rate.allowed)return send(res,429,{error:"Too many attempts"})}
@@ -51,6 +48,6 @@ const adminResponse=await handleAdminProducts(req,url.pathname,readJson);
 if(adminResponse)return send(res,adminResponse.status,adminResponse.data);
 if(url.pathname.startsWith("/api/admin")||url.pathname==="/api/orders"||url.pathname.startsWith("/api/payments"))return send(res,403,{error:"Unavailable in demo mode"});
 return send(res,404,{error:"Not found"});
-}catch(e){return send(res,e?.status||400,{error:e instanceof Error?e.message:"Bad request"})}
+}catch(e){const status=Number.isInteger(e?.status)?e.status:400;const safe=status>=500?"Internal server error":e instanceof Error?e.message:"Bad request";return send(res,status,{error:safe})}
 });
 if(process.argv[1]&&fileURLToPath(import.meta.url)===process.argv[1])server.listen(port,"127.0.0.1",()=>console.log("NovaCart DEMO API on http://127.0.0.1:"+port));
