@@ -44,7 +44,7 @@ export async function updateAdminProduct(id,patch,actorId){
  if(!validProductId(id))throw new Error("Invalid product ID");
  const data=validatePatch(patch);
  return transaction(async db=>{
-  const existing=await db.query("SELECT p.id,v.id AS variant_id,v.stock_reserved FROM products p JOIN variants v ON v.product_id=p.id WHERE p.id=$1 ORDER BY v.sku FOR UPDATE OF p,v",[id]);
+  const existing=await db.query("SELECT p.id,v.id AS variant_id,v.stock_reserved FROM products p JOIN variants v ON v.product_id=p.id WHERE p.id=$1 FOR UPDATE OF p,v",[id]);
   if(existing.rows.length>1)throw Object.assign(new Error("Multi-variant editing is not supported yet"),{status:409});
   if(!existing.rows.length)throw Object.assign(new Error("Product not found"),{status:404});
   if("stock" in data&&data.stock<existing.rows[0].stock_reserved)throw new Error("Stock cannot be below reserved inventory");
