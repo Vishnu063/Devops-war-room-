@@ -3,7 +3,7 @@ import {normalizeEmail} from "./auth.mjs";
 
 async function provision(){
  if(process.env.CONFIRM_OWNER_PROVISION!=="yes")throw new Error("Confirmation required");
- if(process.env.NODE_ENV==="production")throw new Error("Development only");
+ if(process.env.NODE_ENV!=="development")throw new Error("Development mode required");
  if(!process.env.DATABASE_URL)throw new Error("DATABASE_URL required");
  const email=normalizeEmail(process.env.OWNER_EMAIL);
  await transaction(async db=>{
