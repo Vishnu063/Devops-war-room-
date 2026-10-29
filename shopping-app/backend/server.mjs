@@ -36,6 +36,7 @@ if(method==="GET"&&url.pathname==="/api/products"){const page=Number(url.searchP
 if(!process.env.DATABASE_URL&&method==="GET"&&url.pathname.startsWith("/api/products/")){const id=decodeURIComponent(url.pathname.slice("/api/products/".length));const p=products.find(x=>x.id===id);return p?send(res,200,{...p,mode:"DEMO"}):send(res,404,{error:"Product not found"})}
 if(method==="POST"&&url.pathname==="/api/checkout/quote"){const body=await readJson(req);return send(res,200,process.env.DATABASE_URL?await quoteDatabaseCart(body?.items):quoteCart(body?.items))}
 if(process.env.DATABASE_URL&&method==="GET"&&url.pathname.startsWith("/api/products/"))return send(res,404,{error:"Use catalog endpoint for database products"});
+if(method==="GET"&&url.pathname==="/api/admin/me"){if(!process.env.DATABASE_URL)return send(res,403,{error:"Database required"});const user=await currentUser(req);requireRole(user,"OWNER");return send(res,200,{user,mode:"READ_ONLY"})}
 if(url.pathname.startsWith("/api/admin")||url.pathname==="/api/orders"||url.pathname.startsWith("/api/payments"))return send(res,403,{error:"Unavailable in demo mode"});
 return send(res,404,{error:"Not found"});
 }catch(e){return send(res,e?.status||400,{error:e instanceof Error?e.message:"Bad request"})}
