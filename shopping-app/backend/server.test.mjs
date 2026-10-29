@@ -25,6 +25,8 @@ test("demo API returns catalog and refuses orders",async()=>{
   assert.equal(badPagination.status,400);
   const missingProduct=await fetch(base+"/api/products/not-real");
   assert.equal(missingProduct.status,404);
+  const authWithoutDatabase=await fetch(base+"/api/auth/me");
+  assert.equal(authWithoutDatabase.status,403);
   const forbidden=await fetch(base+"/api/orders");
   assert.equal(forbidden.status,403);
  }finally{await new Promise(resolve=>server.close(resolve))}
