@@ -11,3 +11,6 @@ test("reject invalid product ID",()=>assert.equal(validProductId("invalid"),fals
 test("reject empty product patch",()=>assert.throws(()=>validatePatch({})));
 test("reject reserved inventory edits",()=>assert.throws(()=>validatePatch({reserved:0})));
 test("reject malformed stock update",()=>assert.throws(()=>validatePatch({stock:-1})));
+
+test("valid publish toggle",()=>assert.equal(validatePatch({active:true}).active,true));
+test("reject nonboolean publish toggle",()=>assert.throws(()=>validatePatch({active:"true"})));
