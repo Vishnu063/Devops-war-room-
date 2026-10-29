@@ -48,5 +48,6 @@ export async function quoteDatabaseCart(lines){
   items.push({variantId:p.id,sku:p.sku,name:p.name,quantity:line.quantity,unitPricePaise:unit,lineTotalPaise});
  }
  const shippingPaise=subtotalPaise>=99900?0:7900;
+ if(!Number.isSafeInteger(subtotalPaise+shippingPaise))throw new Error("Total too large");
  return {items,subtotalPaise,shippingPaise,taxPaise:0,discountPaise:0,totalPaise:subtotalPaise+shippingPaise,currency:"INR",mode:"DATABASE_QUOTE_ONLY"};
 }
