@@ -21,6 +21,10 @@ test("demo API returns catalog and refuses orders",async()=>{
   assert.equal(dashboardStyle.status,200);
   const unsupported=await fetch(base+"/api/checkout/quote",{method:"POST",headers:{"content-type":"text/plain"},body:"not json"});
   assert.equal(unsupported.status,415);
+  const invalidJson=await fetch(base+"/api/checkout/quote",{method:"POST",headers:{"content-type":"application/json"},body:"{"});
+  assert.equal(invalidJson.status,400);
+  const missingItems=await fetch(base+"/api/checkout/quote",{method:"POST",headers:{"content-type":"application/json"},body:"{}"});
+  assert.equal(missingItems.status,400);
   const badPagination=await fetch(base+"/api/products?page=0");
   assert.equal(badPagination.status,400);
   const missingProduct=await fetch(base+"/api/products/not-real");
