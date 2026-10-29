@@ -3,6 +3,7 @@ import {products} from "./catalog.mjs";
 // Explicitly gated seed for disposable development databases only.
 // Uses stable slugs and SKUs to support repeatable updates.
 async function seed(){
+ if(process.env.NODE_ENV!=="development")throw new Error("Development mode required");
  if(process.env.CONFIRM_DEMO_SEED!=="yes")throw new Error("Set CONFIRM_DEMO_SEED=yes to seed a disposable development database");
  if(!process.env.DATABASE_URL)throw new Error("DATABASE_URL required");
  await transaction(async client=>{
