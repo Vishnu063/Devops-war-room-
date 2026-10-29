@@ -48,7 +48,7 @@ el("productForm").addEventListener("submit",async event=>{
  const data={name:fields.name.value,description:fields.description.value,pricePaise:Math.round(price*100),stock:Number(fields.stock.value)};
  try{
   if(editing){data.active=fields.active.checked;await request("/api/admin/products/"+editing.id,"PATCH",data)}
-  else{data.slug=fields.slug.value;data.categorySlug=fields.categorySlug.value;data.sku=fields.sku.value;const created=await request("/api/admin/products","POST",data);if(fields.active.checked)await request("/api/admin/products/"+created.id,"PATCH",{active:true})}
+  else{data.slug=fields.slug.value;data.categorySlug=fields.categorySlug.value;data.sku=fields.sku.value;data.active=fields.active.checked;await request("/api/admin/products","POST",data)}
   resetForm();await refresh();status("Product saved");
  }catch(error){status(error.message)}
 });
