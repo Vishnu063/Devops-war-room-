@@ -16,7 +16,7 @@ API binds to 127.0.0.1:3100 by default, not a public interface.
 
 The API uses fictional in-memory products when `DATABASE_URL` is unset. When `DATABASE_URL` is configured, catalog listing and cart quotes use parameterized PostgreSQL queries. Database-backed development authentication exists; order creation is not implemented.
 
-To initialize a **disposable development database only**, review `../data-model.sql`, set `DATABASE_URL`, then set `CONFIRM_DEMO_SCHEMA=yes` and run `npm run db:migrate`. Development schema migrations are version-tracked, but are not production-ready. Never apply it to an existing production database.
+To initialize a **disposable development database only**, review `../data-model.sql`, set `DATABASE_URL`, then set `NODE_ENV=development` and `CONFIRM_DEMO_SCHEMA=yes` and run `npm run db:migrate`. Development schema migrations are version-tracked, but are not production-ready. Never apply it to an existing production database.
 
 Database mode quotes use `variantId` rather than demo `id`. The browser demo checkout is separate and does not communicate with this API.
 
@@ -48,7 +48,7 @@ Run on a machine with Node.js 20+, network access to install `pg`, and a **dispo
 $ cd shopping-app/backend
 $ npm install
 $ npm test
-$ CONFIRM_DEMO_SCHEMA=yes npm run db:migrate
+$ NODE_ENV=development CONFIRM_DEMO_SCHEMA=yes npm run db:migrate
 $ NODE_ENV=development CONFIRM_DEMO_SEED=yes npm run db:seed-demo
 $ npm start
 ```
