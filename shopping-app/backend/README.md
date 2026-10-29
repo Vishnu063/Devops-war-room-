@@ -29,3 +29,9 @@ Database mode quotes use `variantId` rather than demo `id`. The browser demo che
 All prices are calculated from server-side demo data in integer paise. Invalid quantity, duplicate lines and insufficient stock are rejected. Administrative, order-creation and payment routes return 403.
 
 **Do not deploy this demo API publicly or use it for actual orders.** Persistent PostgreSQL implementation, authentication, stock reservations, payment provider adapters and tests are still required.
+
+## Authentication development endpoints
+
+Database mode adds `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, and `GET /api/auth/me`. Registration accepts `{"email":"demo@example.com","password":"at-least-12-characters","name":"Demo User"}` and always creates a CUSTOMER account; callers cannot set OWNER roles. Login and registration create a database-backed session using a hashed token and an HttpOnly cookie. Apply `auth-schema.sql` **after** the base schema on a disposable database before using these endpoints.
+
+**Not production-ready:** no account verification, password recovery, login throttling, CSRF token strategy, owner provisioning, security review or integration tests against PostgreSQL. Do not expose this API to the public internet. The static storefront has not been connected to authentication.
