@@ -34,6 +34,10 @@ Open `shopping-app/index.html` in a browser. This is a frontend-only prototype a
 Application code, design, business logic and tests: application development scope.
 Infrastructure, hosting, deployment, CI/CD and DevOps: repository owner's scope.
 
+## Backend development API
+
+A Node.js demo API now exists in [backend/](./backend/), with server-side catalog search, price calculations, input validation and automated tests. This is a development component only; it does not implement database persistence, authentication or real orders. Tests have been authored but not executed in this session.
+
 ## Architecture artifacts
 
 - [30-step implementation plan](./ROADMAP.md)
