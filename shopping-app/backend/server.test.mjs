@@ -11,6 +11,14 @@ test("demo API returns catalog and refuses orders",async()=>{
   const quote=await fetch(base+"/api/checkout/quote",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({items:[{id:"p1",quantity:1,pricePaise:1}]})});
   assert.equal(quote.status,200);
   assert.equal((await quote.json()).totalPaise,849900);
+  const dashboard=await fetch(base+"/admin");
+  assert.equal(dashboard.status,200);
+  assert.match(await dashboard.text(),/Product management/);
+  const dashboardScript=await fetch(base+"/admin.js");
+  assert.equal(dashboardScript.status,200);
+  assert.match(dashboardScript.headers.get("content-type"),/javascript/);
+  const dashboardStyle=await fetch(base+"/admin.css");
+  assert.equal(dashboardStyle.status,200);
   const forbidden=await fetch(base+"/api/orders");
   assert.equal(forbidden.status,403);
  }finally{await new Promise(resolve=>server.close(resolve))}
