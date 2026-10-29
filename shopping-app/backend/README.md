@@ -39,3 +39,18 @@ Database mode adds `POST /api/auth/register`, `POST /api/auth/login`, `POST /api
 ## Owner-only catalog API (development)
 
 With PostgreSQL and authentication configured, OWNER sessions may use `GET /api/admin/products`, `POST /api/admin/products`, and `PATCH /api/admin/products/:id`. Mutations require same-origin JSON requests and record audit events. Creation requires `name`, `slug`, `categorySlug`, `sku`, `pricePaise` and `stock`. New products remain unpublished until explicitly activated. Product edits currently target the first matching variant and therefore are **not ready for multi-variant products**. No public owner registration is supported. Do not use these endpoints for real commerce until database integration tests, owner provisioning and security review are complete.
+
+## Verification checklist (not yet completed)
+
+Run on a machine with Node.js 20+, network access to install `pg`, and a **disposable** PostgreSQL 16+ database:
+
+```sh
+$ cd shopping-app/backend
+$ npm install
+$ npm test
+$ CONFIRM_DEMO_SCHEMA=yes npm run db:migrate
+$ CONFIRM_DEMO_SEED=yes npm run db:seed-demo
+$ npm start
+```
+
+Migration tracking now records schema versions 1 and 2; use a fresh database for first verification. Existing databases created before tracking require manual reconciliation. The admin page is at `http://127.0.0.1:3100/admin`. Verify OWNER login, draft creation, price/stock edits, publication changes, rejection of CUSTOMER sessions, and logout. No production payment, order processing, or owner-account provisioning is implemented.
