@@ -21,6 +21,10 @@ test("demo API returns catalog and refuses orders",async()=>{
   assert.equal(dashboardStyle.status,200);
   const unsupported=await fetch(base+"/api/checkout/quote",{method:"POST",headers:{"content-type":"text/plain"},body:"not json"});
   assert.equal(unsupported.status,415);
+  const badPagination=await fetch(base+"/api/products?page=0");
+  assert.equal(badPagination.status,400);
+  const missingProduct=await fetch(base+"/api/products/not-real");
+  assert.equal(missingProduct.status,404);
   const forbidden=await fetch(base+"/api/orders");
   assert.equal(forbidden.status,403);
  }finally{await new Promise(resolve=>server.close(resolve))}
