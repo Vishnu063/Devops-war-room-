@@ -7,3 +7,7 @@ test("reject negative stock",()=>assert.throws(()=>validateProduct({...item,stoc
 test("reject fractional price",()=>assert.throws(()=>validateProduct({...item,pricePaise:12.5})));
 test("reject role changes",()=>assert.throws(()=>validatePatch({role:"OWNER"})));
 test("reject invalid product ID",()=>assert.equal(validProductId("invalid"),false));
+
+test("reject empty product patch",()=>assert.throws(()=>validatePatch({})));
+test("reject reserved inventory edits",()=>assert.throws(()=>validatePatch({reserved:0})));
+test("reject malformed stock update",()=>assert.throws(()=>validatePatch({stock:-1})));
