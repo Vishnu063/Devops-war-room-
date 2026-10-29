@@ -1,0 +1,9 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {validateProduct,validatePatch,validProductId} from "./admin.mjs";
+const item={name:"Demo chair",slug:"demo-chair",categorySlug:"home",sku:"DEMO-001",pricePaise:10000,stock:4};
+test("valid product",()=>assert.equal(validateProduct(item).sku,"DEMO-001"));
+test("reject negative stock",()=>assert.throws(()=>validateProduct({...item,stock:-1})));
+test("reject fractional price",()=>assert.throws(()=>validateProduct({...item,pricePaise:12.5})));
+test("reject role changes",()=>assert.throws(()=>validatePatch({role:"OWNER"})));
+test("reject invalid product ID",()=>assert.equal(validProductId("invalid"),false));
