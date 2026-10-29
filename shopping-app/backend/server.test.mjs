@@ -19,6 +19,8 @@ test("demo API returns catalog and refuses orders",async()=>{
   assert.match(dashboardScript.headers.get("content-type"),/javascript/);
   const dashboardStyle=await fetch(base+"/admin.css");
   assert.equal(dashboardStyle.status,200);
+  const unsupported=await fetch(base+"/api/checkout/quote",{method:"POST",headers:{"content-type":"text/plain"},body:"not json"});
+  assert.equal(unsupported.status,415);
   const forbidden=await fetch(base+"/api/orders");
   assert.equal(forbidden.status,403);
  }finally{await new Promise(resolve=>server.close(resolve))}
