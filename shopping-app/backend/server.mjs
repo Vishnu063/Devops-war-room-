@@ -6,6 +6,7 @@ import {findProducts,quoteDatabaseCart} from "./repository.mjs";
 import {registerCustomer,authenticateCustomer,requireRole} from "./auth.mjs";
 import {createSession,currentUser,revokeSession,sessionCookie,clearSessionCookie} from "./sessions.mjs";
 import {checkRateLimit,verifySameOrigin,requireJson,clientAddress} from "./security.mjs";
+import {handleAdminProducts} from "./admin-routes.mjs";
 const port=Number(process.env.PORT||3100);
 const maxBytes=16*1024;
 function send(res,status,data){const body=JSON.stringify(data);res.writeHead(status,{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff","x-frame-options":"DENY","content-security-policy":"default-src 'none'"});res.end(body)}
