@@ -8,3 +8,5 @@ test("malformed hash rejected",async()=>assert.equal(await verifyPassword("anyth
 test("role check denies customer owner operations",()=>{assert.throws(()=>requireRole({role:"CUSTOMER"},"OWNER"));assert.doesNotThrow(()=>requireRole({role:"OWNER"},"OWNER"))});
 test("session token is random and hashed for storage",()=>{const a=newSessionToken(),b=newSessionToken();assert.notEqual(a,b);assert.equal(sessionDigest(a).length,64);assert.notEqual(sessionDigest(a),sessionDigest(b))});
 test("public profile excludes password hash",()=>{assert.deepEqual(publicUser({id:"1",email:"demo@example.com",name:"Demo",role:"CUSTOMER",password_hash:"secret"}),{id:"1",email:"demo@example.com",name:"Demo",role:"CUSTOMER"})});
+
+test("dummy digest still performs password verification",async()=>{const dummy="scrypt$00000000000000000000000000000000$"+("00".repeat(64));assert.equal(await verifyPassword("unknown-account-password",dummy),false)});
