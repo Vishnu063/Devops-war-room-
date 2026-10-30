@@ -65,6 +65,6 @@ async function loadPublishedCatalog(){
   wish=new Set([...wish].filter(id=>validIds.has(id)));
   category="All";
   renderFilters();renderProducts();updateCounts();
- }catch(e){console.warn("NovaCart database catalog could not be loaded",e)}
+ }catch(e){console.warn("NovaCart catalog could not be loaded",e);if(databaseCatalog){products=[];cart={};wish=new Set();renderProducts();updateCounts();}}
 }
 loadPublishedCatalog();
