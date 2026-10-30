@@ -1,5 +1,7 @@
 # NovaCart website audit and launch preparation
 
+Verified source commits: `dec2760` (resilient storefront/security capability audit) and `627e72f` (saved checkout addresses and gallery completion).
+
 Assessment:30 October2026 (India). Branch:`feat/novacart-deployment`, baseline:`d03e897`. **Locally verified fictional preview candidate; not production-ready. No public HTTPS URL verified.** Scope: frontend components/routes, backend service and HTTP boundaries, existing SQL/API scenarios, expanded browser journeys, container/HTTPS/backup/recovery acceptance and all4 candidate image scans. Coverage is listed explicitly; passing automation does not verify every possible interaction or external integration.
 
 ## Major feature audit
