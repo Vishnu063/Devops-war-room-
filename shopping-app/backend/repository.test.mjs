@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {quoteDatabaseCart,findProducts} from "./repository.mjs";
+import {quoteDatabaseCart,findProducts,findProductById} from "./repository.mjs";
 
 test("database quote rejects empty carts without connecting",async()=>{
  await assert.rejects(quoteDatabaseCart([]),/Cart must contain/);
@@ -26,4 +26,10 @@ test("database quote rejects carts with more than 50 lines",async()=>{
 });
 test("database quote rejects fractional quantities",async()=>{
  await assert.rejects(quoteDatabaseCart([{variantId:"123e4567-e89b-42d3-a456-426614174000",quantity:1.5}]),/Invalid cart line/);
+});
+
+test("product detail rejects malformed IDs before querying the database",async()=>{
+ await assert.rejects(findProductById("not-a-uuid"),/Invalid product ID/);
+ await assert.rejects(findProductById(""),/Invalid product ID/);
+ await assert.rejects(findProductById(null),/Invalid product ID/);
 });
