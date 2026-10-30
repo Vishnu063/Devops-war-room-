@@ -1,6 +1,6 @@
 # NovaCart deployment delivery
 
-Assessment: 30 October 2026 (India). Branch: `feat/novacart-deployment`. **Not production-ready; no verified public preview URL.** Main was reconciled in merge `2b5fed8`; the deployment source commit is recorded in Git history and the delivery record below.
+Assessment: 30 October 2026 (India). Branch: `feat/novacart-deployment`. **Not production-ready; no verified public preview URL.** Main was reconciled in merge `2b5fed8`; deployment source commit: `12eaa00` (isolated preview deployment and operations handoff).
 
 ## Delivered
 
@@ -51,3 +51,11 @@ Use Node24 (.nvmrc pins24.22.2). test:all starts only disposable fixtures; test:
 ## Operator handoff
 
 Start with ENVIRONMENT.md and DEPLOYMENT_AUDIT.md; follow DEPLOYMENT.md, DATABASE_OPERATIONS.md, BACKUP_RESTORE.md, CI_CD.md, SECURITY.md, ROLLBACK.md and RELEASE_CHECKLIST.md. These cover the requested architecture, environment, migrations, backups, release, rollback, security and operations responsibilities. Application acceptance is in ACCEPTANCE.md and all30 task statuses in PROGRESS.md. Public preview URL: **none verified**. No deployment or production completion is claimed.
+
+## Git review
+
+Source milestone: `12eaa00`; main reconciliation: `2b5fed8`. Review branch: `feat/novacart-deployment`. Pull request creation is blocked by the current GitHub API network policy; no PR URL or successful Actions execution is claimed. Open the branch comparison after the push completes:
+
+https://github.com/Vishnu063/Devops-war-room-/compare/main...feat/novacart-deployment
+
+The source commit plus this delivery-record follow-up preserve the implementation and exact test limitations. No main merge, force push or release publication was performed.
