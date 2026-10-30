@@ -1,6 +1,6 @@
 # NovaCart development service
 
-Requires Node.js 24 (tested 24.19.0), npm and a **new disposable PostgreSQL 16+ database**. The service binds to `127.0.0.1:3100`; it is not a production deployment configuration.
+Requires Node.js 24 (application suite tested24.19.0; patched container base24.22.2), npm and a **new disposable PostgreSQL 16+ database**. The service binds to `127.0.0.1:3100`; it is not a production deployment configuration.
 
 ## Repeatable verification
 
@@ -10,6 +10,7 @@ $ npm ci
 $ npm run check
 $ npm test
 $ npm run test:all
+$ npm run test:deployment
 ```
 
 `test:all` requires access to the local Docker socket and Chromium. It creates its own random database credentials, labelled PostgreSQL 16 container and browser database; it ignores caller payment/mail/database secrets, runs real SQL and browser acceptance, pauses/resumes only that database to verify health recovery, audits dependencies and removes only owned resources. It never uses an existing database. Results are under ignored `test-artifacts/`; raw logs/screenshots may contain fictional personal fixture data and must not be published indiscriminately.

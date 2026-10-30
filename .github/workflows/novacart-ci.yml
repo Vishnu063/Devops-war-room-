@@ -1,0 +1,69 @@
+name: NovaCart quality gates
+on:
+  pull_request:
+    paths: ['shopping-app/**', '.github/workflows/novacart-*.yml']
+  push:
+    branches: [main]
+    paths: ['shopping-app/**', '.github/workflows/novacart-*.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: novacart-ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: shopping-app/backend
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24.22.2
+          cache: npm
+          cache-dependency-path: shopping-app/backend/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:all
+      - name: Container, TLS, backup/restore and migration acceptance
+        run: node ../deploy/test-deployment.mjs
+      - name: Scan built runtime image
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
+        with:
+          image-ref: novacart-app:deployment-qa
+          format: table
+          exit-code: '1'
+          severity: CRITICAL,HIGH
+          ignore-unfixed: false
+      - name: Scan operations image
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+        with:
+          image-ref: novacart-operations:deployment-qa
+          exit-code: '1'
+          severity: CRITICAL,HIGH
+          ignore-unfixed: false
+      - name: Scan proxy image
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+        with:
+          image-ref: novacart-nginx:deployment-qa
+          exit-code: '1'
+          severity: CRITICAL,HIGH
+          ignore-unfixed: false
+      - name: Scan database image
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+        with:
+          image-ref: postgres:16.15-alpine@sha256:0cefaabd882e42bcb2a2f3dc56d3ce4770560ba62fd7f197f1a2e008fd5731ab
+          exit-code: '1'
+          severity: CRITICAL,HIGH
+          ignore-unfixed: false
+      - name: Retain sanitized summaries only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: novacart-sanitized-summaries
+          path: shopping-app/backend/test-artifacts/*summary.json
+          retention-days: 7
+          if-no-files-found: error

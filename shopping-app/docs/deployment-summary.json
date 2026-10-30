@@ -1,0 +1,47 @@
+{
+  "runId": "a0e8327ba867",
+  "status": "VERIFIED_LOCAL_PREVIEW",
+  "checks": [
+    "Compose validation and private generated secrets",
+    "Previously built pinned images available",
+    "Release migration refuses missing verified backup",
+    "Encrypted pre-migration backup, authenticated HTTPS readback and fresh empty restore",
+    "Release migrations and checksums repeat safely without seeding",
+    "Explicit guarded fictional seed in owned disposable database only",
+    "Populated encrypted backup and restore with snapshot row-count comparison",
+    "Changed applied migration checksum is rejected",
+    "GCM authentication rejects tampered ciphertext with matching checksum before SQL",
+    "CA-verified HTTPS, preview authentication, security headers and real DB health",
+    "HTTP redirect uses canonical approved HTTPS origin",
+    "Secure cookies, customer-owner separation and disabled order acceptance",
+    "Non-root app, denied runtime DDL and no published app/database ports",
+    "Bounded concurrent HTTPS catalog smoke load",
+    "Optional internal HTTPS monitor observes authenticated database health",
+    "Controlled HTTPS outage fires and resolves local alert state; same-image recovery"
+  ],
+  "limitations": [
+    "Self-signed local TLS; HTTPS object-store mock is on the same Docker host. No real off-server provider, public deployment, certificate renewal or previous-version rollback verified."
+  ],
+  "imagesReused": true,
+  "basicLoad": {
+    "requests": 10,
+    "concurrency": 2,
+    "p95Ms": 37,
+    "scope": "Small unthrottled local TLS sample, not capacity certification"
+  },
+  "alertEvidence": {
+    "events": [
+      "firing",
+      "resolved"
+    ],
+    "scope": "Actual local HTTPS outage/recovery observations, no external webhook delivery"
+  },
+  "images": {
+    "app": "sha256:25d3d3da35f6b80ad431dc224d2c56656b8d71b1e474329923cc736cd42d1ce2",
+    "operations": "sha256:b8cd096638e1f1977cd64c6852606aed560e91ae453a756619f2728d14da2445",
+    "nginx": "sha256:025c908e67c2c8efccc7e0f87f494f056fcdf10765735ba242e1ab6f319e0a17"
+  },
+  "cleanup": "OWNED_PROJECT_REMOVED",
+  "finishedAt": "2026-10-30T04:44:14.763Z",
+  "scope": "Passing baseline before the final Node24.22.2/security-base updates. Final full retest is blocked by VFS disk capacity."
+}

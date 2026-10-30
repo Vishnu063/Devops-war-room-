@@ -1,0 +1,70 @@
+{
+  "runId": "9633d5dfe669e1cb",
+  "startedAt": "2026-10-30T04:45:33.559Z",
+  "status": "VERIFIED_LOCAL",
+  "checks": {
+    "static-checks": {
+      "exitCode": 0
+    },
+    "unit": {
+      "exitCode": 0,
+      "tests": 68,
+      "passed": 68,
+      "skipped": 0
+    },
+    "postgresql": {
+      "exitCode": 0,
+      "tests": 9,
+      "passed": 9,
+      "skipped": 0
+    },
+    "browser-migrate": {
+      "exitCode": 0
+    },
+    "browser-seed": {
+      "exitCode": 0
+    },
+    "browser": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0
+    },
+    "databaseRecovery": {
+      "unavailableStatus": 503,
+      "recoveredStatus": 200
+    },
+    "dependency-audit": {
+      "exitCode": 0
+    }
+  },
+  "limitations": [
+    "Gateway and SMTP responses are mocked; no live account verification or production deployment."
+  ],
+  "postgresqlVersion": "16.15",
+  "migrations": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "localPerformance": [
+    {
+      "viewport": 1280,
+      "domContentLoadedMs": 209,
+      "transferBytes": 63569,
+      "scope": "Unthrottled loopback Chromium; not a production performance SLO"
+    },
+    {
+      "viewport": 390,
+      "domContentLoadedMs": 178,
+      "transferBytes": 62783,
+      "scope": "Unthrottled loopback Chromium; not a production performance SLO"
+    }
+  ],
+  "browser": "Chromium 154.0.8037.57 built on Debian GNU/Linux 13 (trixie)",
+  "nodePeakRss": "89488 kB",
+  "databaseResourceSample": "66.03MiB / 256MiB | 0.33%",
+  "cleanup": "OWNED_RESOURCES_REMOVED",
+  "finishedAt": "2026-10-30T04:46:11.912Z",
+  "nodeVersion": "v24.19.0"
+}

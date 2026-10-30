@@ -1,6 +1,10 @@
 # NovaCart delivery ledger
 
-Branch: `feat/novacart-commerce`. Audited base: `174f1ea`. Assessment date: **30 October 2026 (India)**. No completion percentage is claimed. The exact repository roadmap, including its extra acceptance requirements, remains authoritative.
+Current branch: `feat/novacart-deployment`; application baseline: `feat/novacart-commerce`. Audited base: `174f1ea`. Assessment date: **30 October 2026 (India)**. No completion percentage is claimed. The exact repository roadmap, including its extra acceptance requirements, remains authoritative.
+
+## Deployment follow-up
+
+See [DEPLOYMENT_DELIVERY.md](DEPLOYMENT_DELIVERY.md) for current evidence: latest69 unit/API tests pass; prior full application run68 units,9 PostgreSQL scenarios and4 browser journeys pass;16 baseline container checks pass. Final patched-image retesting and remaining service scans are blocked by workspace disk. No AWS identity, public URL or production acceptance exists. New container/CI/migration/backup/monitoring artifacts do not complete roadmap release gates. The detailed application evidence below records the earlier commerce milestone.
 
 ## Verified outcome
 

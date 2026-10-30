@@ -14,7 +14,8 @@
     "test:integration": "node --test test/integration.test.mjs",
     "test:browser": "playwright test",
     "check": "cd .. && backend/node_modules/.bin/eslint --config eslint.config.mjs . && node backend/scripts/check-html.mjs",
-    "test:all": "node test/run-qa.mjs --disposable"
+    "test:all": "node test/run-qa.mjs --disposable",
+    "test:deployment": "node ../deploy/test-deployment.mjs"
   },
   "dependencies": {
     "nodemailer": "^10.3.1",

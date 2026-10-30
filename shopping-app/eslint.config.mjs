@@ -6,7 +6,7 @@ export default [
   { ignores: ['**/node_modules/**', '**/test-artifacts/**'] },
   js.configs.recommended,
   {
-    files: ['backend/**/*.mjs', 'eslint.config.mjs'],
+    files: ['backend/**/*.mjs', 'deploy/**/*.mjs', 'eslint.config.mjs'],
     languageOptions: { globals: globals.node },
     rules: { 'no-unused-vars': ['error', { argsIgnorePattern: '^_', caughtErrors: 'none' }] },
   },

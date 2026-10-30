@@ -1,13 +1,31 @@
+function configuredUrl(value) {
+  try {
+    return new URL(value);
+  } catch {
+    throw new Error('Invalid service URL configuration');
+  }
+}
 export function validateConfiguration() {
+  if (process.env.BIND_HOST && !['127.0.0.1', '0.0.0.0'].includes(process.env.BIND_HOST))
+    throw new Error('Invalid BIND_HOST');
+  if (
+    process.env.RELEASE_MODE &&
+    !['preview', 'production', 'development'].includes(process.env.RELEASE_MODE)
+  )
+    throw new Error('Invalid RELEASE_MODE');
+  if (process.env.NODE_ENV === 'production' && process.env.RELEASE_MODE === 'development')
+    throw new Error('Production runtime cannot use development release mode');
+  if (process.env.RELEASE_MODE === 'preview' && process.env.ALLOW_LIVE_PAYMENTS === 'true')
+    throw new Error('Preview cannot enable live payments');
   if (process.env.DATABASE_URL) {
-    const url = new URL(process.env.DATABASE_URL);
+    const url = configuredUrl(process.env.DATABASE_URL);
     if (!['postgres:', 'postgresql:'].includes(url.protocol))
       throw new Error('PostgreSQL DATABASE_URL required');
     if (!/^[0-9a-f]{64}$/i.test(process.env.DATA_ENCRYPTION_KEY || ''))
       throw new Error('DATA_ENCRYPTION_KEY must be a private 32-byte hex key');
   }
   if (process.env.APP_ORIGIN) {
-    const origin = new URL(process.env.APP_ORIGIN);
+    const origin = configuredUrl(process.env.APP_ORIGIN);
     if (
       origin.origin !== process.env.APP_ORIGIN ||
       origin.username ||

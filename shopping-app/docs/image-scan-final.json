@@ -1,0 +1,29 @@
+{
+  "scope": "Final app image only; operations scan failed on disk exhaustion; proxy/database final scans not executed",
+  "imageID": "sha256:88205bea76703091ceecdf02e5d4dd89e9f0cc529cea1c43e4ba47f5a6870783",
+  "image": "novacart-app:deployment-qa",
+  "scanner": "Trivy 0.67.2",
+  "counts": {
+    "CRITICAL": 0,
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 0,
+    "UNKNOWN": 0
+  },
+  "results": [
+    {
+      "target": "novacart-app:deployment-qa (alpine 3.24.3)",
+      "type": "alpine",
+      "class": "os-pkgs"
+    },
+    {
+      "target": "Node.js",
+      "type": "node-pkg",
+      "class": "lang-pkgs"
+    }
+  ],
+  "limitations": [
+    "Scanner warned Alpine3.24 was absent from its EOL lifecycle list; vulnerability analysis ran using the current database.",
+    "A clean image scan is not a penetration test or production approval."
+  ]
+}

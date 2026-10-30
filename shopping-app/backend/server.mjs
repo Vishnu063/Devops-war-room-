@@ -355,11 +355,11 @@ server.keepAliveTimeout = 5000;
 server.maxHeadersCount = 40;
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   validateConfiguration();
-  server.listen(port, '127.0.0.1', () =>
+  server.listen(port, process.env.BIND_HOST || '127.0.0.1', () =>
     console.log(
       'NovaCart ' +
         (process.env.DATABASE_URL ? 'DATABASE' : 'DEMO') +
-        ' application listening on loopback port ' +
+        ' application listening on configured port ' +
         port,
     ),
   );

@@ -58,6 +58,16 @@ export async function quote(actor, input) {
   });
 }
 export async function createOrder(actor, input, idempotencyKey) {
+  if (process.env.NODE_ENV === 'production') {
+    const preview = process.env.RELEASE_MODE !== 'production';
+    if (
+      preview
+        ? process.env.ALLOW_PREVIEW_ORDERS !== 'true'
+        : process.env.ACCEPT_LIVE_ORDERS !== 'true'
+    )
+      fail('Order acceptance is disabled for this release', 503);
+  }
+
   object(input, ['items', 'address', 'addressId', 'paymentMethod', 'couponCode', 'useStoreCredit']);
   const checkoutKey = key(idempotencyKey),
     requested = lines(input.items),

@@ -1,0 +1,71 @@
+name: NovaCart approved preview rollout
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: Approved GHCR image digest from the reviewed publish workflow
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: novacart-preview-deployment
+  cancel-in-progress: false
+jobs:
+  policy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      deployments: read
+      actions: read
+    steps:
+      - name: Require protected environment before obtaining deployment secrets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh api "repos/$GH_REPO/environments/novacart-preview" > environment.json
+          jq -e 'any(.protection_rules[]?; .type == "required_reviewers" and (.reviewers | length) > 0)' environment.json
+  rollout:
+    needs: policy
+    environment: novacart-preview
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Validate approved target and deploy only existing preview services
+        env:
+          IMAGE: ${{ inputs.image }}
+          REPOSITORY: ${{ github.repository }}
+          DEPLOY_HOST: ${{ vars.NOVACART_PREVIEW_HOST }}
+          DEPLOY_USER: ${{ vars.NOVACART_PREVIEW_USER }}
+          DEPLOY_DIRECTORY: ${{ vars.NOVACART_PREVIEW_DIRECTORY }}
+          ENV_FILE: ${{ vars.NOVACART_PREVIEW_ENV_FILE }}
+          CURL_CONFIG: ${{ vars.NOVACART_PREVIEW_CURL_CONFIG }}
+          SMOKE_URL: ${{ vars.NOVACART_PREVIEW_SMOKE_URL }}
+          SSH_KEY: ${{ secrets.NOVACART_PREVIEW_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.NOVACART_PREVIEW_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$IMAGE" =~ ^ghcr.io/[a-z0-9._/-]+@sha256:[a-f0-9]{64}$ ]]
+          [[ "$IMAGE" == "ghcr.io/${REPOSITORY,,}/novacart@sha256:"* ]]
+          [[ "$DEPLOY_HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
+          [[ "$DEPLOY_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
+          for path in "$DEPLOY_DIRECTORY" "$ENV_FILE" "$CURL_CONFIG"; do
+            [[ "$path" =~ ^/[a-zA-Z0-9_./-]+$ ]]
+          done
+          [[ "$SMOKE_URL" =~ ^https://[a-zA-Z0-9.:-]+/api/health$ ]]
+          test -n "$SSH_KEY"
+          test -n "$KNOWN_HOSTS"
+          umask 077
+          KEY_FILE=$(mktemp)
+          HOSTS_FILE=$(mktemp)
+          trap 'rm -f "$KEY_FILE" "$HOSTS_FILE"' EXIT
+          printf '%s\n' "$SSH_KEY" > "$KEY_FILE"
+          printf '%s\n' "$KNOWN_HOSTS" > "$HOSTS_FILE"
+          ssh -i "$KEY_FILE" -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOSTS_FILE" "$DEPLOY_USER@$DEPLOY_HOST" sh -s -- "$IMAGE" "$DEPLOY_DIRECTORY" "$ENV_FILE" "$CURL_CONFIG" "$SMOKE_URL" <<'REMOTE'
+          set -eu
+          export APP_IMAGE="$1" PREVIEW_ENV_FILE="$3" PREVIEW_CURL_CONFIG="$4" PREVIEW_SMOKE_URL="$5" CONFIRM_PREVIEW_ROLLOUT=yes
+          cd "$2"
+          sh deploy/rollout.sh
+          REMOTE

@@ -17,7 +17,11 @@ export function razorpay({
   if (!keyId || !keySecret) fail('Online payments are not configured', 503);
   if (
     !keyId.startsWith('rzp_test_') &&
-    !(process.env.NODE_ENV === 'production' && process.env.ALLOW_LIVE_PAYMENTS === 'true')
+    !(
+      process.env.NODE_ENV === 'production' &&
+      process.env.RELEASE_MODE === 'production' &&
+      process.env.ALLOW_LIVE_PAYMENTS === 'true'
+    )
   )
     fail('Live payments require separate activation', 503);
   async function call(path, method = 'GET', body) {

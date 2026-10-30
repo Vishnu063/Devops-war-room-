@@ -7,3 +7,6 @@ test-artifacts/
 playwright-report/
 __pycache__/
 *.log
+
+# Private local deployment inputs
+shopping-app/.local-preview/
