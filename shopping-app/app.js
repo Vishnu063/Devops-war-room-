@@ -1,6 +1,6 @@
 "use strict";
 // Phase 1 storefront: demo catalog only. No payment, account, or order processing.
-const products=[
+let products=[
 {id:"p1",name:"The Everyday Chair",category:"Home",price:8499,image:"https://images.unsplash.com/photo-1503602642458-232111445657?w=700&q=80"},
 {id:"p2",name:"Studio Headphones",category:"Tech",price:3499,image:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=700&q=80"},
 {id:"p3",name:"Everyday Sneakers",category:"Lifestyle",price:2999,image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700&q=80"},
@@ -13,7 +13,7 @@ const products=[
 const $=id=>document.getElementById(id);
 const money=n=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(n);
 function read(key,fallback){try{const x=JSON.parse(localStorage.getItem(key));return x??fallback}catch{return fallback}}
-const validIds=new Set(products.map(p=>p.id));
+let validIds=new Set(products.map(p=>p.id));
 let cart=read("novacart-demo-cart",{});if(!cart||typeof cart!=="object"||Array.isArray(cart))cart={};
 cart=Object.fromEntries(Object.entries(cart).filter(([id,q])=>validIds.has(id)&&Number.isInteger(q)&&q>0&&q<=99));
 let wish=read("novacart-demo-wishlist",[]);wish=new Set(Array.isArray(wish)?wish.filter(id=>validIds.has(id)):[]);
@@ -36,3 +36,32 @@ $("closeDrawer").addEventListener("click",()=>$("drawer").close());
 $("drawer").addEventListener("click",e=>{if(e.target===$("drawer"))$("drawer").close()});
 document.querySelectorAll("[data-category]").forEach(a=>a.addEventListener("click",()=>{category=a.dataset.category;renderFilters();renderProducts()}));
 renderFilters();renderProducts();updateCounts();
+
+// Load the published database catalog when the storefront is served by the API.
+// The static-file preview continues to use the explicitly fictional catalog.
+async function loadPublishedCatalog(){
+ if(!["http:","https:"].includes(location.protocol))return;
+ try{
+  const health=await fetch("/api/health",{cache:"no-store"});
+  if(!health.ok)return;
+  const state=await health.json();
+  if(state.mode!=="DATABASE")return;
+  const response=await fetch("/api/products?limit=50",{cache:"no-store"});
+  if(!response.ok)throw new Error("Catalog unavailable");
+  const data=await response.json();
+  if(!Array.isArray(data.items))throw new Error("Invalid catalog response");
+  products=data.items.map(p=>({
+   id:p.variant_id,
+   name:String(p.name||"Unnamed product"),
+   category:String(p.category||"Other"),
+   price:Number(p.pricePaise)/100,
+   image:""
+  })).filter(p=>p.id&&Number.isFinite(p.price)&&p.price>=0);
+  validIds=new Set(products.map(p=>p.id));
+  cart=Object.fromEntries(Object.entries(cart).filter(([id,q])=>validIds.has(id)&&Number.isInteger(q)&&q>0&&q<=99));
+  wish=new Set([...wish].filter(id=>validIds.has(id)));
+  category="All";
+  renderFilters();renderProducts();updateCounts();
+ }catch(e){console.warn("NovaCart database catalog could not be loaded",e)}
+}
+loadPublishedCatalog();
