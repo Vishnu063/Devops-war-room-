@@ -44,3 +44,11 @@ Branch: `feat/novacart-commerce`. Base audited: `174f1ea`. Follow the repository
 | 30 | NOT STARTED | Accurate API/run/recovery/release handoff | Existing docs correctly deny production readiness |
 
 Roadmap checkboxes remain unchecked until each item's full acceptance is verified. IMPLEMENTED describes code present; VERIFIED requires executed acceptance including meaningful negative cases. External integrations are never inferred from mocks.
+
+## Database-backed shopping milestone
+
+Foundation commit: `c5ebe6b`. The subsequent shopping commit implements persistent registered/guest carts and wishlists, guest-to-account merge, encrypted addresses, server recalculation, idempotent COD checkout, reserved stock and cancellation, ownership-scoped history and PDF development receipts. Explicit `COD_ENABLED=true` and a private `DATA_ENCRYPTION_KEY` are required; no actual delivery/payment is implied. Shared authentication attempt limits now use PostgreSQL in database mode.
+
+Executed: all 59 original tests still pass; three PostgreSQL integration cases pass, including a two-principal last-unit race (one success, one stock conflict), duplicate checkout replay and encrypted address checks. Desktop 1280×900 and mobile 390×844 Chromium tests both passed guest checkout/cancellation, persistence after reload, no horizontal overflow and zero axe WCAG A/AA violations on the tested storefront. Initial contrast failures were fixed, not ignored. This does not yet verify account recovery, payment adapters, fulfillment or every dialog/screen.
+
+Steps 15/16/18/26/28/29 have verified subflows; their full roadmap checkboxes remain pending for the additional acceptance stated above. Migrations 1–3 applied successfully on disposable PostgreSQL, including repeated migration invocation. No production migration was attempted.

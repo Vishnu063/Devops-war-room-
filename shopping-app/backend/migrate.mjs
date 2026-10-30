@@ -22,6 +22,10 @@ async function main(){
       await client.query(authSql);
       await client.query("INSERT INTO schema_migrations(version) VALUES(2)");
     }
+    if(!versions.has(3)){
+      await client.query(await readFile(new URL('./migrations/003-commerce.sql',import.meta.url),'utf8'));
+      await client.query("INSERT INTO schema_migrations(version) VALUES(3)");
+    }
     await client.query("COMMIT");
     console.log("NovaCart base and session schemas applied to disposable development database");
   }catch(error){await client.query("ROLLBACK");throw error}finally{client.release()}

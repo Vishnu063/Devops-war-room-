@@ -1,9 +1,10 @@
 import {database} from "./db.mjs";
+import {effectivePrice,money,fail} from "./validation.mjs";
 // Parameterized, read-only catalog access to the PostgreSQL schema.
 // Prices are integer paise and are never accepted from the browser.
 const baseSelect=`
  SELECT p.id::text AS id,p.slug,p.title AS name,p.description,
- c.name AS category,v.id::text AS variant_id,v.sku,v.price_paise AS "pricePaise",
+ c.name AS category,v.id::text AS variant_id,v.sku,${effectivePrice} AS "pricePaise",
  (v.stock_on_hand-v.stock_reserved) AS stock
  FROM products p
  JOIN variants v ON v.product_id=p.id
@@ -31,7 +32,7 @@ export async function quoteDatabaseCart(lines){
   if(seen.has(line.variantId))throw new Error("Duplicate variant");
   seen.add(line.variantId);requested.push(line.variantId);
  }
- const result=await database().query(`SELECT v.id::text AS id,v.sku,p.title AS name,v.price_paise AS "pricePaise",(v.stock_on_hand-v.stock_reserved) AS stock
+ const result=await database().query(`SELECT v.id::text AS id,v.sku,p.title AS name,${effectivePrice} AS "pricePaise",(v.stock_on_hand-v.stock_reserved) AS stock
  FROM variants v JOIN products p ON p.id=v.product_id
  WHERE v.id::text=ANY($1::text[]) AND v.active=TRUE AND p.active=TRUE`,[requested]);
  const byId=new Map(result.rows.map(row=>[row.id,row]));
@@ -52,3 +53,16 @@ export async function quoteDatabaseCart(lines){
  if(!Number.isSafeInteger(subtotalPaise+shippingPaise))throw new Error("Total too large");
  return {items,subtotalPaise,shippingPaise,taxPaise:0,discountPaise:0,totalPaise:subtotalPaise+shippingPaise,currency:"INR",mode:"DATABASE_QUOTE_ONLY"};
 }
+
+export async function findProduct(id){
+ if(typeof id!=='string'||id.length>120)fail('Invalid product identifier');
+ const db=database(),p=await db.query('SELECT p.id,p.slug,p.title AS name,p.description,c.name AS category FROM products p LEFT JOIN categories c ON c.id=p.category_id WHERE (p.id::text=$1 OR p.slug=$1) AND p.active',[id]);
+ if(!p.rows.length)fail('Product not found',404);
+ const product=p.rows[0];
+ const variants=await db.query(`SELECT v.id AS "variantId",v.sku,v.attributes,${effectivePrice} AS "pricePaise",v.stock_on_hand-v.stock_reserved AS stock FROM variants v WHERE v.product_id=$1 AND v.active ORDER BY v.price_paise,v.id`,[product.id]);
+ const images=await db.query('SELECT storage_key AS src,alt_text AS alt FROM product_images WHERE product_id=$1 ORDER BY sort_order,id',[product.id]);
+ const reviews=await db.query("SELECT id,rating,body,created_at FROM reviews WHERE product_id=$1 AND moderation_status='APPROVED' ORDER BY created_at DESC LIMIT 50",[product.id]);
+ const questions=await db.query('SELECT id,question,answer FROM product_questions WHERE product_id=$1 AND approved ORDER BY created_at DESC LIMIT 50',[product.id]);
+ return {...product,variants:variants.rows.map(v=>({...v,pricePaise:money(v.pricePaise)})),images:images.rows,reviews:reviews.rows,questions:questions.rows,mode:'DATABASE'};
+}
+export async function categories(){return {items:(await database().query('SELECT slug,name FROM categories ORDER BY name')).rows}}
