@@ -10,7 +10,8 @@
     "test": "node --test *.test.mjs",
     "db:migrate": "node migrate.mjs",
     "db:seed-demo": "node seed-demo.mjs",
-    "db:provision-owner": "node provision-owner.mjs"
+    "db:provision-owner": "node provision-owner.mjs",
+    "test:integration": "node --test test/integration.test.mjs"
   },
   "dependencies": {
     "pg": "^8.13.3"
