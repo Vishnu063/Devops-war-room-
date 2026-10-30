@@ -1,66 +1,49 @@
-# NovaCart development API
+# NovaCart development service
 
-This is a **demo-only**, Node.js HTTP service for validating catalog and quote logic. It is not the production backend and does not persist orders, process payments, or reserve inventory. Database-backed development authentication is available but unverified.
+Requires Node.js 24 (tested 24.19.0), npm and a **new disposable PostgreSQL 16+ database**. The service binds to `127.0.0.1:3100`; it is not a production deployment configuration.
 
-## Run locally
-Requires Node.js 20+. Run `npm install` inside `shopping-app/backend` before starting; the PostgreSQL driver is required even in demo mode.
+## Repeatable verification
 
-```sh
-$ node --test shopping-app/backend/catalog.test.mjs
-$ node shopping-app/backend/server.mjs
+```bash
+$ cd shopping-app/backend
+$ npm ci
+$ npm run check
+$ npm test
+$ npm run test:all
 ```
 
-API binds to 127.0.0.1:3100 by default, not a public interface.
+`test:all` requires access to the local Docker socket and Chromium. It creates its own random database credentials, labelled PostgreSQL 16 container and browser database; it ignores caller payment/mail/database secrets, runs real SQL and browser acceptance, pauses/resumes only that database to verify health recovery, audits dependencies and removes only owned resources. It never uses an existing database. Results are under ignored `test-artifacts/`; raw logs/screenshots may contain fictional personal fixture data and must not be published indiscriminately.
 
-## PostgreSQL development mode
+If no system Chromium is installed, install the matching Playwright browser with `npx playwright install chromium` where network policy permits, or set `CHROMIUM_EXECUTABLE` to an installed Chromium. This environment uses `/usr/bin/chromium`; the Playwright download CDN was blocked. Do not bypass TLS or network controls.
 
-The API uses fictional in-memory products when `DATABASE_URL` is unset. When `DATABASE_URL` is configured, catalog listing and cart quotes use parameterized PostgreSQL queries. Database-backed development authentication exists; order creation is not implemented.
+## Local interactive development
 
-To initialize a **disposable development database only**, review `../data-model.sql`, set `DATABASE_URL`, then set `NODE_ENV=development` and `CONFIRM_DEMO_SCHEMA=yes` and run `npm run db:migrate`. Development schema migrations are version-tracked, but are not production-ready. Never apply it to an existing production database.
+Create a fresh empty disposable database yourself, then set its private `DATABASE_URL` in your shell. Do not paste it into chat or commit it. The following `$` prefixes indicate shell commands; omit the prefix when copying.
 
-Database mode quotes use `variantId` rather than demo `id`. The browser demo checkout is separate and does not communicate with this API.
-
-## Endpoints
-- GET /api/health
-- GET /api/products?search=&category=&sort=&page=&limit=
-- GET /api/products/:id
-- POST /api/checkout/quote with JSON `{"items":[{"id":"p1","quantity":1}]}`
-
-All prices are calculated from server-side demo data in integer paise. Invalid quantity, duplicate lines and insufficient stock are rejected. Administrative, order-creation and payment routes return 403.
-
-**Do not deploy this demo API publicly or use it for actual orders.** Production-grade PostgreSQL integration, stock reservations, payment provider adapters and executed tests are still required.
-
-## Authentication development endpoints
-
-Database mode adds `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, and `GET /api/auth/me`. Registration accepts `{"email":"demo@example.com","password":"at-least-12-characters","name":"Demo User"}` and always creates a CUSTOMER account; callers cannot set OWNER roles. Login and registration create a database-backed session using a hashed token and an HttpOnly cookie. The development migration command applies the base and authentication schemas on a fresh disposable database.
-
-**Not production-ready:** no account verification, password recovery, shared-store login throttling, comprehensive CSRF protection, production owner provisioning, security review or integration tests against PostgreSQL. Do not expose this API to the public internet. The static storefront has not been connected to authentication.
-
-## Owner-only catalog API (development)
-
-With PostgreSQL and authentication configured, OWNER sessions may use `GET /api/admin/products`, `POST /api/admin/products`, and `PATCH /api/admin/products/:id`. Mutations require same-origin JSON requests and record audit events. Creation requires `name`, `slug`, `categorySlug`, `sku`, `pricePaise` and `stock`. New products default to draft; an OWNER can explicitly set `active: true` during creation. Product edits reject products with multiple variants and therefore are **not ready for multi-variant products**. No public owner registration is supported. Do not use these endpoints for real commerce until database integration tests, owner provisioning and security review are complete.
-
-## Verification checklist (not yet completed)
-
-Run on a machine with Node.js 20+, network access to install `pg`, and a **disposable** PostgreSQL 16+ database:
-
-```sh
+```bash
 $ cd shopping-app/backend
-$ npm install
-$ npm test
-$ NODE_ENV=development CONFIRM_DEMO_SCHEMA=yes npm run db:migrate
-$ NODE_ENV=development CONFIRM_DEMO_SEED=yes npm run db:seed-demo
+$ npm ci
+$ export NODE_ENV=development
+$ export DATA_ENCRYPTION_KEY="$(node -p "require('node:crypto').randomBytes(32).toString('hex')")"
+$ export COD_ENABLED=true
+$ export APP_ORIGIN=http://127.0.0.1:3100
+$ CONFIRM_DEMO_SCHEMA=yes npm run db:migrate
+$ CONFIRM_DEMO_SEED=yes npm run db:seed-demo
 $ npm start
 ```
 
-Migration tracking now records schema versions 1 and 2; use a fresh database for first verification. Existing databases created before tracking require manual reconciliation. The admin page is at `http://127.0.0.1:3100/admin`. Verify OWNER login, draft creation, price/stock edits, publication changes, rejection of CUSTOMER sessions, and logout. No production payment or order processing is implemented. Development-only owner provisioning is available but unverified.
+`DATABASE_URL` must already point to the new disposable database. Preserve its encryption key privately for subsequent restarts. Changing it makes previously encrypted records unreadable. Open the local service in your browser and register a fictional account. In a second shell with the same private environment, promote only that already-registered fixture:
 
-### Development owner account
-
-Register a customer through the same-origin API first. On a disposable development database, explicitly promote that existing account:
-
-```sh
+```bash
 $ NODE_ENV=development OWNER_EMAIL=owner@example.test CONFIRM_OWNER_PROVISION=yes npm run db:provision-owner
 ```
 
-Replace the example email with your actual test account. This command requires `NODE_ENV=development`; it does not create a password or expose a public owner-registration endpoint. Sign in at `/admin` after provisioning.
+Sign out/in after promotion, open `/admin`, and enroll owner TOTP from the account security panel. Scripts reject production mode and require explicit confirmation. Never run demo seed/provision against a live database. Without `DATABASE_URL`, only the original in-memory catalog/quotation compatibility mode works; persistence APIs are unavailable.
+
+## Configuration
+
+See `.env.example` for names, not credentials. Node does not automatically load `.env`; use shell environment bindings or `node --env-file=/private/path/dev.env server.mjs` with an appropriately protected file. `DATABASE_URL`, `DATA_ENCRYPTION_KEY` and, for production validation, canonical HTTPS `APP_ORIGIN` are mandatory. COD is disabled unless explicitly enabled. Delivery prefixes and COD caps are development rules awaiting owner approval. Tax remains provisional zero, and generated PDFs are labelled development receipts, not GST invoices.
+
+Razorpay requires test keys and a separately configured webhook secret. SMTP needs a TLS-verified `smtp:`/`smtps:` URL and approved sender. None was available here. Do not set `ALLOW_LIVE_PAYMENTS=true` without separate authorization and release gates. `RUN_JOBS=false` disables the 30-second local maintenance loop for controlled QA. Production provisioning, migrations, key rotation and deployment need separately reviewed procedures.
+
+See [API](../docs/API.md), [architecture](../ARCHITECTURE.md), [acceptance](../docs/ACCEPTANCE.md) and [handoff](../docs/HANDOFF.md).

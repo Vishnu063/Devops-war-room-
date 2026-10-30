@@ -1,54 +1,63 @@
 # NovaCart delivery ledger
 
-Branch: `feat/novacart-commerce`. Base audited: `174f1ea`. Follow the repository's exact ROADMAP.md; the handover's shorter descriptions do not replace its additional acceptance criteria. Milestones are recorded by descriptive commit in `git log`; this ledger is updated with implementation evidence rather than speculative percentages.
+Branch: `feat/novacart-commerce`. Audited base: `174f1ea`. Assessment date: **30 October 2026 (India)**. No completion percentage is claimed. The exact repository roadmap, including its extra acceptance requirements, remains authoritative.
 
-## Audited foundation — 2026-10-30
+## Verified outcome
 
-- Node 24.19.0, PostgreSQL 16 (new disposable labelled database only).
-- Existing unit/HTTP tests: **59 passed**, zero skips/failures.
-- New real PostgreSQL acceptance: **1 passed**. Executed migrations twice, fictional seed, customer registration (no privilege escalation), owner registration/provisioning/login, draft/publish/price/stock changes, server-side quote, audit records and logout/revocation.
-- No production database, infrastructure or deployment changed. Lockfile now records actual dependency resolution; use npm ci for subsequent installs.
-- No provider credentials or mail transport are configured. Live payment/email/shipping verification will remain BLOCKED unless supplied securely; adapter and local workflow work can continue.
+Database-backed storefront/customer/guest shopping, owner catalog and operations, transactional inventory, local payment/refund contracts and security/privacy workflows now replace the former quote-only foundation. Production readiness: **NO**. Real gateway/SMTP/courier verification, statutory invoicing/retention, business policy and deployment acceptance remain open.
 
-| Step | Status | Scope / acceptance still required | Relevant files / evidence |
+Executed clean isolated QA: 64 unit/API tests, 9 PostgreSQL integration scenarios, 4 Chromium browser journeys; zero failures/skips in the recorded passing run. ESLint/HTML structural checks passed. axe found zero WCAG A/AA violations on the tested active storefront/account-support/product/owner views; this is limited coverage. Dependency audit: zero vulnerabilities reported. Database pause produced health503, resume recovered200. Migrations1–4 were applied on fresh disposable PostgreSQL16 and repeated without resetting data. See `qa-summary.json` for actual versions/timing/resources and local performance samples, and HANDOFF.md for limits.
+
+## All 30 roadmap items
+
+Status applies to the entire exact item. VERIFIED means the stated development acceptance was executed, not production authorization. IMPLEMENTED means substantial code is present but full acceptance remains. BLOCKED identifies an external dependency alongside locally implemented work. IN PROGRESS preserves gaps that need further product/QA work. Checkboxes are deliberately narrower than the set of code changes.
+
+| Step | Status | Implementation / relevant files | Executed evidence / remaining acceptance |
 | --- | --- | --- | --- |
-| 01 | IN PROGRESS | Single-seller India/INR baseline exists; owner must approve tax, return, fulfillment and legal rules | ARCHITECTURE.md; production policy decisions remain open |
-| 02 | IN PROGRESS | Reconcile 20 screens and exact 40-feature acceptance; document journeys | ARCHITECTURE.md |
-| 03 | IN PROGRESS | Keep Node/PostgreSQL working architecture; clarify provider boundaries | backend/server.mjs, db.mjs |
-| 04 | IN PROGRESS | Existing NovaCart tokens; distinguish fictional data and actual imagery | styles.css, DEMO-DATA.md |
-| 05 | IN PROGRESS | Existing responsive prototype; integrated browser/a11y checks pending | index.html, app.js |
-| 06 | IN PROGRESS | Existing modules tested; frontend integration/configuration still needed | backend/*.mjs; 59 tests |
-| 07 | IN PROGRESS | Base/auth migrations executed and repeatable; additive commerce migrations pending | migrate.mjs, data-model.sql; PostgreSQL acceptance |
-| 08 | IN PROGRESS | Prototype DOM components exist; shared API/loading/forms needed | app.js, admin.js |
-| 09 | IN PROGRESS | Registration/login/session verified; verification/reset/revocation hardening pending | auth.mjs, sessions.mjs; PostgreSQL acceptance |
-| 10 | IN PROGRESS | Owner catalog verified; MFA and broader administration pending | admin*.mjs; PostgreSQL acceptance |
-| 11 | NOT STARTED | Persistent editable homepage/banners/content | Existing homepage is demo-only |
-| 12 | IN PROGRESS | Database catalog/variants exist; detail, media and bulk operations pending | repository.mjs, admin.mjs |
-| 13 | IN PROGRESS | Database search/sort/pagination exist; integrated UX and index checks pending | repository.mjs |
-| 14 | NOT STARTED | Persistent details/reviews/moderation/Q&A/comparisons | Prototype modal only |
-| 15 | NOT STARTED | Account-linked cart/wishlist/recent/recommendations | Browser storage only |
-| 16 | NOT STARTED | Validated addresses, delivery policy, secure guest checkout | Quotes only |
-| 17 | NOT STARTED | Provider abstraction, signed callbacks, COD and idempotency | Provider credentials absent; live activation BLOCKED |
-| 18 | NOT STARTED | Atomic orders/reservations/state machine and invoices | Schema only |
-| 19 | NOT STARTED | Manual/provider shipping workflow and notifications | Schema only; provider account absent |
-| 20 | NOT STARTED | Cancellation/returns/refunds/reconciliation | Schema only |
-| 21 | NOT STARTED | Coupons/credit/gift cards/loyalty/scheduled sales | Schema only |
-| 22 | NOT STARTED | Consent/outbox/in-app notifications and optional email/recovery | Transport absent |
-| 23 | NOT STARTED | Persisted support conversations and owner handling | Schema only |
-| 24 | NOT STARTED | Actual analytics/exports/stock alerts/audit views | Basic audit rows exist |
-| 25 | NOT STARTED | Product SEO, sitemap, CMS controls | Static metadata only |
-| 26 | IN PROGRESS | Existing protections tested; shared rate limiting/MFA/security audit pending | security.mjs; 59 tests |
-| 27 | NOT STARTED | Privacy export/deletion/consent/retention controls | No workflows yet |
-| 28 | NOT STARTED | Browser responsive, accessibility and performance acceptance | Not executed yet |
-| 29 | IN PROGRESS | Unit/HTTP + PostgreSQL foundation verified; commerce/concurrency/browser tests pending | backend/test/integration.test.mjs |
-| 30 | NOT STARTED | Accurate API/run/recovery/release handoff | Existing docs correctly deny production readiness |
+| 01 | BLOCKED | ARCHITECTURE.md, ACCEPTANCE.md; India single-seller baseline | Tax, seller identity, fulfillment/returns/legal policy require owner decisions |
+| 02 | IMPLEMENTED | ACCEPTANCE.md; 20 screen groups, 40 acceptance criteria | Four integrated browser journeys; full owner/customer UX acceptance pending |
+| 03 | VERIFIED | ARCHITECTURE.md; Node24/PostgreSQL, modular services/provider boundaries | Running same-origin service and real SQL/API/browser tests |
+| 04 | IMPLEMENTED | styles.css, admin.css, assets/*.svg, DEMO-DATA.md | Original illustrations/brand tokens; owner-approved catalog/photos/content pending |
+| 05 | IN PROGRESS | index.html, app.js, account.js, owner-console.js | Desktop/mobile overflow and selected axe checks pass; full UX/manual assistive review pending |
+| 06 | VERIFIED | backend/*-routes.mjs, config.mjs, validation.mjs, ui.js, forms.js, eslint.config.mjs | Static checks, all unit/API and SQL/browser suites; maintainable shared structure |
+| 07 | VERIFIED | data-model.sql, auth-schema.sql, migrations/003,004, migrate.mjs | Fresh PG16 migrations1–4 twice, seed/integration/concurrency; existing production data migration NOT verified |
+| 08 | IMPLEMENTED | ui.js, forms.js; shared dialogs/forms/loading/errors | Real owner/customer/guest browser journeys; exhaustive component UX acceptance pending |
+| 09 | BLOCKED | auth.mjs, sessions.mjs, identity.mjs, mail.mjs | Local verification/reset/expiry/revocation tests pass; real verification/reset delivery blocked by SMTP |
+| 10 | VERIFIED | admin*.mjs, identity.mjs, owner-console.js | Role gates, owner CRUD/audit, TOTP setup/required code/replay/freshness tested; controlled production recovery remains release gate |
+| 11 | IMPLEMENTED | business.mjs, operations-routes.mjs, owner-console.js, app.js | Editable plain-text homepage/campaign/policy blocks; final imagery/content approval and full CMS browser acceptance pending |
+| 12 | VERIFIED | catalog-admin.mjs, repository.mjs, owner-console.js | Owner browser create/publish/add variant; SQL sale/stock/bulk partial-error tests; safe image-reference validation implemented, no file upload service |
+| 13 | VERIFIED | repository.mjs, migrations/003-commerce.sql, app.js | Parameterized indexed title search/filter/sort/page, malformed query and sale-price SQL cases; large production query-plan/load review pending |
+| 14 | VERIFIED | repository.mjs, customer.mjs, app.js | SQL moderation and browser delivered review, question/approved answer and comparison exercised |
+| 15 | VERIFIED | shopping.mjs, customer.mjs, app.js | Cart/wishlist persistence/merge verified; recent clearing/consent and available same-category suggestion API tested; no popularity/AI claims |
+| 16 | BLOCKED | validation.mjs, commerce.mjs, app.js | Guest/customer checkout and encrypted addresses/PIN validation tested; actual delivery eligibility policy awaits approval |
+| 17 | BLOCKED | payments.mjs, payment-ui.js, commerce.mjs | Mocked official API, signed capture/failure/refund binding, duplicate/late events tested; real sandbox UPI/cards/netbanking and COD business policy unverified |
+| 18 | BLOCKED | commerce.mjs, fulfillment.mjs, receipt.mjs | Atomic checkout, last-unit race, release/consume/idempotency and PDF verified; GST invoice requirements need owner/tax approval |
+| 19 | BLOCKED | fulfillment.mjs, operations-routes.mjs, owner-console.js | Manual shipping/delivery/tracking and in-app status tested; courier selection/dispatch/API and actual delivery notifications unverified |
+| 20 | BLOCKED | fulfillment.mjs, payments.mjs, commerce.mjs | Local cancel/partial return/credit/refund and uncertain/late payment tests pass; real provider reconciliation/cash payouts await sandbox/account evidence |
+| 21 | BLOCKED | pricing.mjs, business.mjs, fulfillment.mjs | Coupon quota release, one-use gift credit, spend/restore and scheduled sale tested; loyalty economics/credit instrument terms require approval |
+| 22 | BLOCKED | mail.mjs, jobs.mjs, customer.mjs | Consent/default-off, mock send and opted-in outbox behavior tested; SMTP account/inbox validation required; no SMS/push |
+| 23 | VERIFIED | customer.mjs, account.js, owner-console.js | SQL owner/private replies and cross-account denial; customer support browser journey |
+| 24 | VERIFIED | business.mjs, operations-routes.mjs, owner-console.js | Actual DB analytics/low stock/audit owner screen and formula-safe CSV tested; not audited financial revenue |
+| 25 | IMPLEMENTED | seo.mjs, business.mjs, app.js | Escaped product metadata/canonical, sitemap/robots and CMS/consent; production indexing disabled, crawl/content/marketing acceptance pending |
+| 26 | IN PROGRESS | identity.mjs, sessions.mjs, security.mjs, http.mjs, db.mjs | Role/CSRF/SQL/bad-input/rate/MFA tests, encrypted fields, headers, dependency audit pass; independent review, proxy/edge/load/key rotation still release gates |
+| 27 | BLOCKED | customer.mjs, jobs.mjs, migrations/004, account.js | Consent, private comprehensive export, erasure refusal/success and audit tested; retention/legal hold/backups/provider erasure policy awaits owner approval |
+| 28 | IN PROGRESS | styles.css, admin.css, browser specs | Chromium1280×900/390×844, selected axe, screenshots visually reviewed, loopback timing/resource samples; Safari/Firefox/manual accessibility and realistic load remain |
+| 29 | VERIFIED | backend/*.test.mjs, test/integration.test.mjs, test/browser, test/run-qa.mjs | Full local suite, negative cases, provider mocks, concurrency and DB outage recovery pass; live/provider/production validation remains distinct |
+| 30 | IMPLEMENTED | README files, API.md, ACCEPTANCE.md, HANDOFF.md, qa-summary.json | Reproducible commands, limitations, migration/operations/release gates documented; owner acceptance and sandbox/deployment sign-off outstanding |
 
-Roadmap checkboxes remain unchecked until each item's full acceptance is verified. IMPLEMENTED describes code present; VERIFIED requires executed acceptance including meaningful negative cases. External integrations are never inferred from mocks.
+## Tests and interpretation
 
-## Database-backed shopping milestone
+`npm run test:all` creates unique owned PostgreSQL and browser databases, generated private credentials, fixture users and a local app. It checks a run-specific nonce before browser work and removes its own labelled container afterward. No production services/data are touched. Reports never imply that mocks contacted Razorpay/SMTP or that browser emulation tested real mobile devices.
 
-Foundation commit: `c5ebe6b`. The subsequent shopping commit implements persistent registered/guest carts and wishlists, guest-to-account merge, encrypted addresses, server recalculation, idempotent COD checkout, reserved stock and cancellation, ownership-scoped history and PDF development receipts. Explicit `COD_ENABLED=true` and a private `DATA_ENCRYPTION_KEY` are required; no actual delivery/payment is implied. Shared authentication attempt limits now use PostgreSQL in database mode.
+The nine SQL scenarios exercise: Stage2 auth/owner/catalog/audit; guest/account merge and encrypted checkout; last-unit concurrency; shipment/review/partial return/refund/receipt; signed gateway events and late-capture safety; coupons/credit/consent/support/export/erasure; identity/revocation/throttling/TOTP; variants/scheduled search/bulk/stock/SQL/origin negatives; moderated discovery/comparison/CMS/SEO/consent. They contain multiple assertions each. Browser flows cover guest checkout/cancel at two sizes, owner creation/publication/variant/reporting and customer register/wishlist/checkout/shipping/return/preferences/support/reviews/Q&A/comparison.
 
-Executed: all 59 original tests still pass; three PostgreSQL integration cases pass, including a two-principal last-unit race (one success, one stock conflict), duplicate checkout replay and encrypted address checks. Desktop 1280×900 and mobile 390×844 Chromium tests both passed guest checkout/cancellation, persistence after reload, no horizontal overflow and zero axe WCAG A/AA violations on the tested storefront. Initial contrast failures were fixed, not ignored. This does not yet verify account recovery, payment adapters, fulfillment or every dialog/screen.
+Initial failures discovered during implementation were fixed: select defaults and malformed option markup, axe contrast issues, bulk routing, account-erasure SQL and bootstrap readiness. No assertion or accessibility rule was suppressed to manufacture success. The HTML checker self-checks the malformed closing-tag regression.
 
-Steps 15/16/18/26/28/29 have verified subflows; their full roadmap checkboxes remain pending for the additional acceptance stated above. Migrations 1–3 applied successfully on disposable PostgreSQL, including repeated migration invocation. No production migration was attempted.
+## Commit evidence
+
+- `c5ebe6b`: audited existing59 tests, fresh PostgreSQL Stage2 evidence and lockfile.
+- `03aa67e`: database-backed shopping, atomic orders/reservations, guest merge and initial browser coverage.
+- `ae8e3e2`: owner operations, signed gateway/refund contracts, shared security/MFA/privacy, CMS/discovery and full repeatable QA.
+- Final handoff commit follows this implementation; `git log feat/novacart-commerce` is authoritative. A commit ID cannot include itself in its own content.
+
+No production migration/deployment or real financial expenditure was authorized or performed. See HANDOFF.md for exact external dependencies and the final production-readiness gates.

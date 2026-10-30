@@ -1,58 +1,20 @@
-# NovaCart demo business configuration
+# NovaCart fictional development data
 
-**DEMO ONLY — NOT REAL BUSINESS INFORMATION.**
+Seed data is fictional: eight original example products across Home, Lifestyle and Tech, with illustrative INR prices/SKUs/stock. Original local SVG illustrations are labelled as illustrations. They are not photographs of verified merchandise. Owner-created integration/browser fixture products are also fictional.
 
-This file contains fictional test data for development, QA and UI previews. Never treat these values as verified business information, live payment credentials or actual stock.
+Database mode persists actual **development records**, including orders, inventory reservations, customer accounts, support and audit rows. A recorded development order does not establish real payment, shipment or fulfillment. Never enter real personal/payment data in a test environment.
 
-## Payment gateway
-- Provider: Razorpay (mock adapter; no live account connected)
-- Mode: DEMO / simulated checkout only
-- Methods shown: UPI, credit/debit card, net banking, Cash on Delivery
-- Payment outcomes for testing: success, declined, cancelled, timeout, duplicate callback
-- All payment references: `DEMO-PAY-*`; no money moves
-- Never enter real card numbers, UPI PINs or banking credentials
+## Provisional development rules
 
-## Business identity
-- Display name: NovaCart Demo Store
-- Email: demo@novacart.example
-- Phone: +91 00000 00000 (placeholder; not callable)
-- Address: Demo Business Park, Pune, Maharashtra, India (fictional)
-- GSTIN: NOT PROVIDED — do not fabricate or display a GST registration number
-- Currency: INR
+- Integer INR paise. Shipping ₹79 below merchandise subtotal ₹999, free at/above that threshold; tax is provisional zero.
+- COD requires `COD_ENABLED=true`; default cap is ₹50,000 unless explicitly configured. Owner-recorded collection/payout is an assertion, not bank settlement proof.
+- PIN syntax is checked; optional `DELIVERY_PIN_PREFIXES` restricts eligible prefixes. Absence of prefixes is a development convenience, not a claim of nationwide delivery.
+- Unpaid online orders reserve stock for 15 minutes. COD reservations persist until dispatch/cancel; stock is consumed on shipment.
+- Return window defaults to 14 days in development and zero in production unless configured. `.env.example` illustrates a 7-day override; neither is an approved business policy.
+- Returned merchandise refunds exclude delivery charges. Split returns allocate merchandise discounts/credit and reverse loyalty points cumulatively; the shipping amount can leave payment status PARTIALLY_REFUNDED even after all merchandise is returned.
+- Loyalty earns one development point per ₹100 of delivered merchandise after discounts, reverses cumulative returned amounts and has no approved cash redemption value. Gift codes represent owner-issued credit, not purchased payment instruments.
+- PDF files are development receipts, not GST invoices or proof of settlement.
 
-## Illustrative products and stock
-All prices and quantities are invented for development.
-| SKU | Product | Price (INR) | Demo stock |
-| --- | --- | ---: | ---: |
-| DEMO-HOME-001 | The Everyday Chair | 8,499 | 15 |
-| DEMO-TECH-002 | Studio Headphones | 3,499 | 30 |
-| DEMO-LIFE-003 | Everyday Sneakers | 2,999 | 25 |
-| DEMO-HOME-004 | Ceramic Accent Vase | 1,299 | 40 |
-| DEMO-HOME-005 | Minimal Desk Lamp | 2,199 | 18 |
-| DEMO-LIFE-006 | Classic Wristwatch | 4,999 | 12 |
-| DEMO-TECH-007 | Wireless Essentials | 1,899 | 35 |
-| DEMO-HOME-008 | Everyday Home Decor | 999 | 50 |
+Razorpay and SMTP responses in tests are mocked. No sandbox account, real inbox or courier service was verified. The old standalone `checkout-demo.html` explicitly simulates outcomes and is separate from persistent checkout; it is not linked as the real shopping checkout.
 
-Product images in the current prototype are illustrative external photos, not verified merchandise photography.
-
-## Shipping
-- Provider: Mock Shiprocket adapter (not connected to Shiprocket)
-- Demo service area: Indian six-digit PIN codes for validation tests, **not actual serviceability**
-- Standard shipping fee: ₹79 for carts below ₹999; ₹0 for carts at/above ₹999
-- Mock estimated delivery: 3–7 business days, not a real promise
-- Mock tracking format: `DEMO-SHIP-000001`
-- No real pickup, labels, tracking or carrier booking
-
-## Store policies — fictional test copy
-- Demo cancellation: before simulated dispatch
-- Demo return request window: 7 days after simulated delivery
-- Demo refund: simulated only, no funds transferred
-- Demo COD: available as a simulated payment choice, subject to mock eligibility
-- Demo customer support: demo@novacart.example (non-deliverable example domain)
-- All fees, windows, tax and shipping rules must be reviewed and approved before launch
-
-## Safety gates
-1. Label all mock payment/order/shipping UI clearly as **DEMO**.
-2. Do not expose live checkout or claim any transaction completed.
-3. Replace all business, catalog, policy, tax, contact and shipping data with verified real information before production.
-4. Live provider credentials must be supplied securely outside source control and never committed.
+Replace fixture catalog/imagery and approve seller identity, contact information, GST, shipping, return, payment, loyalty/credit and privacy terms before any real commerce. No business metrics, customer reviews, photos or successful external transactions are invented as real facts.
