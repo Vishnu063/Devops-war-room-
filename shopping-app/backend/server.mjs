@@ -38,7 +38,7 @@ if(url.pathname.startsWith("/api/auth/")){
  }
  return send(res,404,{error:"Not found"});
 }
-if(method==="GET"&&url.pathname==="/api/health")return send(res,200,{status:"ok",mode:"DEMO"});
+if(method==="GET"&&url.pathname==="/api/health")return send(res,200,{status:"ok",mode:process.env.DATABASE_URL?"DATABASE":"DEMO"});
 if(method==="GET"&&url.pathname==="/api/products"){const page=Number(url.searchParams.get("page")||1),limit=Number(url.searchParams.get("limit")||12);if(!Number.isInteger(page)||page<1||page>10000||!Number.isInteger(limit)||limit<1||limit>50)return send(res,400,{error:"Invalid pagination"});return send(res,200,process.env.DATABASE_URL?await findProducts({search:url.searchParams.get("search")||"",category:url.searchParams.get("category")||"",sort:url.searchParams.get("sort")||"featured",page,limit}):listProducts({search:url.searchParams.get("search")||"",category:url.searchParams.get("category")||"",sort:url.searchParams.get("sort")||"featured",page,limit}))}
 if(!process.env.DATABASE_URL&&method==="GET"&&url.pathname.startsWith("/api/products/")){const id=decodeURIComponent(url.pathname.slice("/api/products/".length));const p=products.find(x=>x.id===id);return p?send(res,200,{...p,mode:"DEMO"}):send(res,404,{error:"Product not found"})}
 if(method==="POST"&&url.pathname==="/api/checkout/quote"){if(!requireJson(req))return send(res,415,{error:"JSON required"});const body=await readJson(req);return send(res,200,process.env.DATABASE_URL?await quoteDatabaseCart(body?.items):quoteCart(body?.items))}
