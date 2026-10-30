@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=24 <25"
   },
   "scripts": {
     "start": "node server.mjs",
@@ -12,7 +12,9 @@
     "db:seed-demo": "node seed-demo.mjs",
     "db:provision-owner": "node provision-owner.mjs",
     "test:integration": "node --test test/integration.test.mjs",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "check": "cd .. && backend/node_modules/.bin/eslint --config eslint.config.mjs . && node backend/scripts/check-html.mjs",
+    "test:all": "node test/run-qa.mjs --disposable"
   },
   "dependencies": {
     "nodemailer": "^10.3.1",
@@ -22,6 +24,11 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
-    "@playwright/test": "^1.64.1"
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.1",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
+    "html-validate": "^11.17.0",
+    "prettier": "^3.9.10"
   }
 }

@@ -1,1 +1,178 @@
-:root{font-family:Inter,Arial,sans-serif;color:#253e32;background:#f7f8f3}*{box-sizing:border-box}body{margin:0}header{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:22px 5%;background:#fff;border-bottom:1px solid #dce6da}header a{font:bold 30px Georgia,serif;text-decoration:none;color:#253e32}header span{font-size:12px;color:#748779}main{max-width:1150px;margin:auto;padding:45px 5%}h1{font:normal 48px Georgia,serif}h2{font:normal 27px Georgia,serif}section{background:#fff;border:1px solid #e0e8dd;border-radius:12px;padding:24px;margin:22px 0}#loginPanel{max-width:440px}label{display:block;font-size:13px;margin:14px 0}input,textarea{display:block;width:100%;padding:11px;margin-top:6px;border:1px solid #c9d5c8;border-radius:6px;font:inherit}input[type=checkbox]{display:inline-block;width:auto}button{background:#284537;color:#fff;border:0;border-radius:6px;padding:11px 17px;margin:5px 7px 5px 0;cursor:pointer}button:hover{background:#486d54}#products{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.product{padding:18px;border:1px solid #dfe8db;border-radius:8px;background:#fbfcfa}.product strong,.product small{display:block;margin-bottom:9px}.product small{color:#738879}#status{min-height:25px}#productForm{max-width:650px}@media(max-width:600px){h1{font-size:36px}main{padding:24px 4%}section{padding:16px}}
+:root {
+  font-family: Inter, Arial, sans-serif;
+  color: #253e32;
+  background: #f7f8f3;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 22px 5%;
+  background: #fff;
+  border-bottom: 1px solid #dce6da;
+}
+header a {
+  font:
+    bold 30px Georgia,
+    serif;
+  text-decoration: none;
+  color: #253e32;
+}
+header span {
+  font-size: 12px;
+  color: #748779;
+}
+main {
+  max-width: 1150px;
+  margin: auto;
+  padding: 45px 5%;
+}
+h1 {
+  font:
+    normal 48px Georgia,
+    serif;
+}
+h2 {
+  font:
+    normal 27px Georgia,
+    serif;
+}
+section {
+  background: #fff;
+  border: 1px solid #e0e8dd;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 22px 0;
+}
+#loginPanel {
+  max-width: 440px;
+}
+label {
+  display: block;
+  font-size: 13px;
+  margin: 14px 0;
+}
+input,
+textarea {
+  display: block;
+  width: 100%;
+  padding: 11px;
+  margin-top: 6px;
+  border: 1px solid #c9d5c8;
+  border-radius: 6px;
+  font: inherit;
+}
+input[type='checkbox'] {
+  display: inline-block;
+  width: auto;
+}
+button {
+  background: #284537;
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 11px 17px;
+  margin: 5px 7px 5px 0;
+  cursor: pointer;
+}
+button:hover {
+  background: #486d54;
+}
+#products {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.product {
+  padding: 18px;
+  border: 1px solid #dfe8db;
+  border-radius: 8px;
+  background: #fbfcfa;
+}
+.product strong,
+.product small {
+  display: block;
+  margin-bottom: 9px;
+}
+.product small {
+  color: #738879;
+}
+#status {
+  min-height: 25px;
+}
+#productForm {
+  max-width: 650px;
+}
+@media (max-width: 600px) {
+  h1 {
+    font-size: 36px;
+  }
+  main {
+    padding: 24px 4%;
+  }
+  section {
+    padding: 16px;
+  }
+}
+header span,
+.product small {
+  color: #4c6350;
+}
+select {
+  font: inherit;
+  max-width: 100%;
+  padding: 12px;
+  border: 1px solid #697d65;
+  border-radius: 5px;
+  background: white;
+  color: #253e32;
+}
+.operationCard {
+  border-top: 1px solid #dae2d7;
+  padding: 18px 0;
+  overflow-wrap: anywhere;
+}
+.formGrid {
+  max-width: 650px;
+}
+.accountActions,
+#ownerNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid #315f3c;
+  outline-offset: 3px;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.small {
+  font-size: 12px;
+}
+.muted {
+  color: #4c6350;
+  font-size: 13px;
+}
+a {
+  color: #284537;
+}
+#ownerPanels:empty {
+  display: none;
+}
+body {
+  overflow-wrap: anywhere;
+}
