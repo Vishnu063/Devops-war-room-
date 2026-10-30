@@ -15,8 +15,8 @@ async function readJson(req){let text="";for await(const chunk of req){text+=chu
 export const server=createServer(async(req,res)=>{
 try{
 const url=new URL(req.url,"http://localhost");const method=req.method;
-if(method==="GET"&&["/admin","/admin.html","/admin.css","/admin.js"].includes(url.pathname)){
- const name=url.pathname==="/admin"?"admin.html":url.pathname.slice(1);
+if(method==="GET"&&["/","/index.html","/styles.css","/app.js","/admin","/admin.html","/admin.css","/admin.js"].includes(url.pathname)){
+ const name=url.pathname==="/admin"?"admin.html":url.pathname==="/"?"index.html":url.pathname.slice(1);
  const file=new URL("../"+name,import.meta.url);
  const bytes=await readFile(file);
  res.writeHead(200,{"content-type":name.endsWith(".css")?"text/css; charset=utf-8":name.endsWith(".js")?"text/javascript; charset=utf-8":"text/html; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff","content-security-policy":"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"});
