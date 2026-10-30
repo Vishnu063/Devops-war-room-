@@ -1,0 +1,18 @@
+{
+  "runId": "bdf0f8bf6011",
+  "status": "FAILED",
+  "checks": [
+    "Compose validation and private generated secrets",
+    "Previously built pinned images available",
+    "Release migration refuses missing verified backup",
+    "Encrypted pre-migration backup, authenticated HTTPS readback and fresh empty restore"
+  ],
+  "limitations": [
+    "Self-signed local TLS; HTTPS object-store mock is on the same Docker host. No real off-server provider, public deployment, certificate renewal or previous-version rollback verified."
+  ],
+  "imagesReused": true,
+  "error": "Deployment command 11 failed; inspect private test-artifacts/deployment-command-11.log",
+  "cleanup": "OWNED_PROJECT_REMOVED",
+  "finishedAt": "2026-10-30T05:10:07.122Z",
+  "diagnosis": "PostgreSQL migration log: could not create table file; No space left on device. Application/data logic was not the reported failure."
+}

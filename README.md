@@ -1,11 +1,9 @@
 # NovaCart
 
-Premium India-first general shopping website under development.
+India-first shopping application in [shopping-app](shopping-app/), replacing the previous DevOps War Room application.
 
-The repository root opens the NovaCart storefront in [shopping-app](./shopping-app/).
+The storefront now uses PostgreSQL-backed catalog, accounts, carts, orders and owner workflows. Local automated acceptance evidence and remaining work are recorded in the [delivery ledger](shopping-app/docs/PROGRESS.md).
 
-- [Application preview source](./shopping-app/index.html)
-- [Full 30-step roadmap](./shopping-app/ROADMAP.md)
-- [Implementation status and instructions](./shopping-app/README.md)
+**Not production-ready:** live payment, mail, courier, tax/legal policy and deployment validation remain outstanding. Infrastructure, CI/CD, hosting and production credentials belong to the owner.
 
-**Status:** Frontend prototype only. No real orders or payments are accepted. DevOps, deployment and hosting remain the owner's responsibility.
+See [setup commands](shopping-app/backend/README.md), [roadmap](shopping-app/ROADMAP.md) and [release handoff](shopping-app/docs/HANDOFF.md).

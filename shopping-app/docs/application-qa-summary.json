@@ -1,0 +1,82 @@
+{
+  "runId": "a32adefa14b6873b",
+  "startedAt": "2026-10-30T10:59:39.222Z",
+  "status": "VERIFIED_LOCAL",
+  "checks": {
+    "static-checks": {
+      "exitCode": 0
+    },
+    "unit": {
+      "exitCode": 0,
+      "tests": 70,
+      "passed": 70,
+      "skipped": 0
+    },
+    "postgresql": {
+      "exitCode": 0,
+      "tests": 9,
+      "passed": 9,
+      "skipped": 0
+    },
+    "browser-migrate": {
+      "exitCode": 0
+    },
+    "browser-seed": {
+      "exitCode": 0
+    },
+    "browser": {
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    "databaseRecovery": {
+      "unavailableStatus": 503,
+      "recoveredStatus": 200
+    },
+    "dependency-audit": {
+      "exitCode": 0
+    }
+  },
+  "limitations": [
+    "Gateway and SMTP responses are mocked; no live account verification or production deployment."
+  ],
+  "postgresqlVersion": "16.15",
+  "migrations": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "localPerformance": [
+    {
+      "viewport": 1280,
+      "domContentLoadedMs": 852,
+      "transferBytes": 72091,
+      "scope": "Unthrottled loopback Chromium; not a production performance SLO"
+    },
+    {
+      "viewport": 390,
+      "domContentLoadedMs": 168,
+      "transferBytes": 71305,
+      "scope": "Unthrottled loopback Chromium; not a production performance SLO"
+    },
+    {
+      "viewport": 320,
+      "domContentLoadedMs": 278,
+      "transferBytes": 71305,
+      "scope": "Unthrottled loopback Chromium; not a production performance SLO"
+    },
+    {
+      "viewport": 768,
+      "domContentLoadedMs": 314,
+      "transferBytes": 72091,
+      "scope": "Unthrottled loopback Chromium; not a production performance SLO"
+    }
+  ],
+  "browser": "Chromium 154.0.8037.57 built on Debian GNU/Linux 13 (trixie)",
+  "nodePeakRss": "107456 kB",
+  "databaseResourceSample": "63.31MiB / 256MiB | 0.09%",
+  "cleanup": "OWNED_RESOURCES_REMOVED",
+  "finishedAt": "2026-10-30T11:01:10.794Z",
+  "nodeVersion": "v24.19.0"
+}

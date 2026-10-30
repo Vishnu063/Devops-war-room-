@@ -1,0 +1,99 @@
+name: NovaCart approved preview image
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish to the owner-approved GHCR registry after quality gates
+        required: true
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: novacart-preview-release
+  cancel-in-progress: false
+jobs:
+  approval-policy:
+    if: inputs.publish && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      deployments: read
+      actions: read
+    steps:
+      - name: Require existing protected environment and approved registry
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          APPROVED_REGISTRY: ${{ vars.NOVACART_APPROVED_REGISTRY }}
+        run: |
+          test "$APPROVED_REGISTRY" = ghcr.io
+          gh api "repos/$GH_REPO/environments/novacart-preview" > environment.json
+          jq -e 'any(.protection_rules[]?; .type == "required_reviewers" and (.reviewers | length) > 0)' environment.json
+  publish:
+    needs: approval-policy
+    environment: novacart-preview
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.22.2
+      - name: Repeat complete release acceptance
+        working-directory: shopping-app/backend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm run test:all
+          node ../deploy/test-deployment.mjs
+      - uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+        with:
+          image-ref: novacart-app:deployment-qa
+          exit-code: '1'
+          severity: CRITICAL,HIGH
+          ignore-unfixed: false
+      - name: Scan operations image
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+        with:
+          image-ref: novacart-operations:deployment-qa
+          exit-code: '1'
+          severity: CRITICAL,HIGH
+          ignore-unfixed: false
+      - name: Scan proxy image
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+        with:
+          image-ref: novacart-nginx:deployment-qa
+          exit-code: '1'
+          severity: CRITICAL,HIGH
+          ignore-unfixed: false
+      - name: Scan database image
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+        with:
+          image-ref: novacart-database:deployment-qa
+          exit-code: '1'
+          severity: CRITICAL,HIGH
+          ignore-unfixed: false
+      - name: Publish immutable preview image and digest
+        env:
+          REGISTRY_TOKEN: ${{ github.token }}
+          REGISTRY_USER: ${{ github.actor }}
+          REPOSITORY: ${{ github.repository }}
+          REVISION: ${{ github.sha }}
+        run: |
+          IMAGE="ghcr.io/${REPOSITORY,,}/novacart:$REVISION"
+          printf '%s' "$REGISTRY_TOKEN" | docker login ghcr.io -u "$REGISTRY_USER" --password-stdin
+          docker tag novacart-app:deployment-qa "$IMAGE"
+          docker push "$IMAGE"
+          docker image inspect "$IMAGE" --format '{{index .RepoDigests 0}}' > preview-image-digest.txt
+          docker logout ghcr.io
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: approved-preview-image-digest
+          path: preview-image-digest.txt
+          retention-days: 30
+# Remote rollout and production activation are intentionally absent until the owner
+# supplies/approves a server, origin, access method and production acceptance evidence.

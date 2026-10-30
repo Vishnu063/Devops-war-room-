@@ -1,0 +1,180 @@
+name: novacart-preview
+services:
+  novacart-db:
+    image: ${DATABASE_IMAGE:-novacart-database:local}
+    build:
+      context: .
+      target: database
+    user: '70:70'
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      POSTGRES_DB: novacart
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/admin_password
+    secrets: [admin_password, app_password, migrator_password, backup_password]
+    volumes:
+      - database:/var/lib/postgresql/data
+      - ./deploy/db/init.sh:/docker-entrypoint-initdb.d/010-roles.sh:ro
+    networks: [database]
+    healthcheck:
+      test: [CMD-SHELL, 'test -f /var/lib/postgresql/data/novacart-roles.ready && pg_isready -h 127.0.0.1 -U postgres -d novacart']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+    mem_limit: 384m
+    cpus: 1
+    logging: &logging
+      driver: json-file
+      options: {max-size: 10m, max-file: '3'}
+  novacart-app:
+    image: ${APP_IMAGE:-novacart-app:local}
+    build:
+      context: .
+      target: app
+      args: {NODE_IMAGE: '${NODE_IMAGE:-node:24-alpine@sha256:8a32c8cf649a49915a66e81e7a609223c708d0adabf288ee3f4077d765542f85}'}
+    environment:
+      NODE_ENV: production
+      RELEASE_MODE: preview
+      APP_ORIGIN: ${APP_ORIGIN:?Set canonical HTTPS preview origin}
+      DATABASE_URL_FILE: /run/secrets/app_url
+      DATA_ENCRYPTION_KEY_FILE: /run/secrets/data_key
+      ALLOW_PREVIEW_ORDERS: 'false'
+      ACCEPT_LIVE_ORDERS: 'false'
+      COD_ENABLED: 'false'
+      ALLOW_LIVE_PAYMENTS: 'false'
+      SEO_INDEXABLE: 'false'
+      BIND_HOST: 0.0.0.0
+      NODE_OPTIONS: --max-old-space-size=384
+    secrets: [app_url, data_key]
+    depends_on:
+      novacart-db: {condition: service_healthy}
+    networks: [application, database]
+    read_only: true
+    tmpfs: ['/tmp:rw,noexec,nosuid,size=16m']
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+    stop_grace_period: 20s
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 1
+    logging: *logging
+  nginx:
+    environment:
+      APP_ORIGIN: ${APP_ORIGIN:?Set canonical HTTPS preview origin}
+    image: ${NGINX_PROXY_IMAGE:-novacart-nginx:local}
+    build:
+      context: ./deploy/nginx
+      args: {NGINX_IMAGE: '${NGINX_IMAGE:-nginx:stable-alpine@sha256:0e52bd054126cdc040b1276c0af347aeb02a41b9cfe305d6094767ac30e97949}'}
+    ports:
+      - '127.0.0.1:${PREVIEW_HTTPS_PORT:-8443}:8443'
+    secrets: [tls_cert, tls_key, preview_auth]
+    depends_on:
+      novacart-app: {condition: service_healthy}
+    networks: [edge, application]
+    read_only: true
+    tmpfs: ['/tmp:rw,noexec,nosuid,size=16m']
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    mem_limit: 96m
+    cpus: 0.5
+    logging: *logging
+  operations:
+    profiles: [operations]
+    image: ${OPERATIONS_IMAGE:-novacart-operations:local}
+    build:
+      context: .
+      target: operations
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:24-alpine@sha256:8a32c8cf649a49915a66e81e7a609223c708d0adabf288ee3f4077d765542f85}
+        POSTGRES_IMAGE: ${POSTGRES_IMAGE:-postgres:16.15-alpine@sha256:0cefaabd882e42bcb2a2f3dc56d3ce4770560ba62fd7f197f1a2e008fd5731ab}
+    environment:
+      DATABASE_URL_FILE: /run/secrets/migrator_url
+      DATA_ENCRYPTION_KEY_FILE: /run/secrets/data_key
+      BACKUP_ENCRYPTION_KEY_FILE: /run/secrets/backup_key
+      BACKUP_UPLOAD_BASE_URL: ${BACKUP_UPLOAD_BASE_URL:-}
+      BACKUP_UPLOAD_TOKEN_FILE: /run/secrets/backup_token
+    secrets: [migrator_url, data_key, backup_key, backup_token]
+    volumes: [backups:/backups]
+    depends_on:
+      novacart-db: {condition: service_healthy}
+    networks: [database, backup_egress]
+    read_only: true
+    tmpfs: ['/tmp:rw,noexec,nosuid,size=128m']
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 384m
+    cpus: 1
+    logging: *logging
+  backup:
+    profiles: [backups]
+    image: ${OPERATIONS_IMAGE:-novacart-operations:local}
+    command: [../deploy/scripts/backup.mjs, schedule]
+    environment:
+      DATABASE_URL_FILE: /run/secrets/backup_url
+      BACKUP_ENCRYPTION_KEY_FILE: /run/secrets/backup_key
+      BACKUP_UPLOAD_BASE_URL: ${BACKUP_UPLOAD_BASE_URL:-}
+      BACKUP_UPLOAD_TOKEN_FILE: /run/secrets/backup_token
+      BACKUP_INTERVAL_SECONDS: '86400'
+    secrets: [backup_url, backup_key, backup_token]
+    volumes: [backups:/backups]
+    networks: [database, backup_egress]
+    read_only: true
+    tmpfs: ['/tmp:rw,noexec,nosuid,size=128m']
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: 'no'
+    mem_limit: 256m
+    cpus: 0.5
+    logging: *logging
+
+  monitor:
+    profiles: [monitoring]
+    image: ${APP_IMAGE:-novacart-app:local}
+    command: [node, ../deploy/scripts/monitor.mjs, schedule]
+    environment:
+      MONITOR_URL: https://nginx:8443/api/health
+      MONITOR_HOST: ${PREVIEW_HOST:-localhost:8443}
+      MONITOR_AUTH_FILE: /run/secrets/monitor_login
+      NODE_EXTRA_CA_CERTS: /run/secrets/tls_cert
+      MONITOR_INTERVAL_SECONDS: '60'
+    secrets: [monitor_login, tls_cert]
+    healthcheck: {disable: true}
+    networks: [application]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    mem_limit: 96m
+    cpus: 0.25
+    logging: *logging
+
+networks:
+  edge: {}
+  application: {internal: true}
+  database: {internal: true}
+  backup_egress: {}
+volumes:
+  database: {}
+  backups: {}
+secrets:
+  admin_password: {file: '${SECRETS_DIRECTORY:?Set private secrets directory}/admin_password'}
+  app_password: {file: '${SECRETS_DIRECTORY}/app_password'}
+  migrator_password: {file: '${SECRETS_DIRECTORY}/migrator_password'}
+  app_url: {file: '${SECRETS_DIRECTORY}/app_url'}
+  migrator_url: {file: '${SECRETS_DIRECTORY}/migrator_url'}
+  admin_url: {file: '${SECRETS_DIRECTORY}/admin_url'}
+  data_key: {file: '${SECRETS_DIRECTORY}/data_key'}
+  backup_key: {file: '${SECRETS_DIRECTORY}/backup_key'}
+  backup_token: {file: '${SECRETS_DIRECTORY}/backup_token'}
+  tls_cert: {file: '${SECRETS_DIRECTORY}/tls/cert.pem'}
+  tls_key: {file: '${SECRETS_DIRECTORY}/tls/key.pem'}
+  preview_auth: {file: '${SECRETS_DIRECTORY}/preview_auth'}
+
+  monitor_login: {file: '${SECRETS_DIRECTORY}/monitor_login'}
+
+  backup_password: {file: '${SECRETS_DIRECTORY}/backup_password'}
+  backup_url: {file: '${SECRETS_DIRECTORY}/backup_url'}

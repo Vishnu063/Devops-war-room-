@@ -1,0 +1,91 @@
+{
+  "assessmentDate": "2026-10-30",
+  "scope": "Final website candidate including checkout saved-address picker and product gallery; exact IDs match deployment-summary.json",
+  "scanner": "Trivy 0.67.2",
+  "images": [
+    {
+      "service": "app",
+      "image": "novacart-app:deployment-qa",
+      "imageID": "sha256:65ee87b1df8ae39ee7db66f3b07269f17306e05b019949cc647d7e9a475b70c1",
+      "counts": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0,
+        "UNKNOWN": 0
+      },
+      "targets": [
+        {
+          "target": "novacart-app:deployment-qa (alpine 3.24.3)",
+          "type": "alpine"
+        },
+        {
+          "target": "Node.js",
+          "type": "node-pkg"
+        }
+      ]
+    },
+    {
+      "service": "operations",
+      "image": "novacart-operations:deployment-qa",
+      "imageID": "sha256:d854d4c9a0f1341b3460e9b292ced7d51219d2ded0a29195df4563be06682248",
+      "counts": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0,
+        "UNKNOWN": 0
+      },
+      "targets": [
+        {
+          "target": "novacart-operations:deployment-qa (alpine 3.24.3)",
+          "type": "alpine"
+        },
+        {
+          "target": "Node.js",
+          "type": "node-pkg"
+        }
+      ]
+    },
+    {
+      "service": "proxy",
+      "image": "novacart-nginx:deployment-qa",
+      "imageID": "sha256:2fe946c05add7f65fcd732e2389be9aa554ea563243dbf0ae0a939505b214856",
+      "counts": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0,
+        "UNKNOWN": 0
+      },
+      "targets": [
+        {
+          "target": "novacart-nginx:deployment-qa (alpine 3.24.3)",
+          "type": "alpine"
+        }
+      ]
+    },
+    {
+      "service": "database",
+      "image": "novacart-database:deployment-qa",
+      "imageID": "sha256:0ddee917ea78094b17189f94007af21e729b5ca205e0059180ef57eea34bb46b",
+      "counts": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0,
+        "UNKNOWN": 0
+      },
+      "targets": [
+        {
+          "target": "novacart-database:deployment-qa (alpine 3.24.3)",
+          "type": "alpine"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Alpine3.24 absent from scanner lifecycle list; analysis completed.",
+    "No severity exclusions; no public-host or penetration-test acceptance implied."
+  ]
+}

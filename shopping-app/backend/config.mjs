@@ -1,0 +1,60 @@
+function configuredUrl(value) {
+  try {
+    return new URL(value);
+  } catch {
+    throw new Error('Invalid service URL configuration');
+  }
+}
+export function validateConfiguration() {
+  if (process.env.BIND_HOST && !['127.0.0.1', '0.0.0.0'].includes(process.env.BIND_HOST))
+    throw new Error('Invalid BIND_HOST');
+  if (
+    process.env.RELEASE_MODE &&
+    !['preview', 'production', 'development'].includes(process.env.RELEASE_MODE)
+  )
+    throw new Error('Invalid RELEASE_MODE');
+  if (process.env.NODE_ENV === 'production' && process.env.RELEASE_MODE === 'development')
+    throw new Error('Production runtime cannot use development release mode');
+  if (process.env.RELEASE_MODE === 'preview' && process.env.ALLOW_LIVE_PAYMENTS === 'true')
+    throw new Error('Preview cannot enable live payments');
+  if (process.env.DATABASE_URL) {
+    const url = configuredUrl(process.env.DATABASE_URL);
+    if (!['postgres:', 'postgresql:'].includes(url.protocol))
+      throw new Error('PostgreSQL DATABASE_URL required');
+    if (!/^[0-9a-f]{64}$/i.test(process.env.DATA_ENCRYPTION_KEY || ''))
+      throw new Error('DATA_ENCRYPTION_KEY must be a private 32-byte hex key');
+  }
+  if (process.env.APP_ORIGIN) {
+    const origin = configuredUrl(process.env.APP_ORIGIN);
+    if (
+      origin.origin !== process.env.APP_ORIGIN ||
+      origin.username ||
+      origin.password ||
+      !['http:', 'https:'].includes(origin.protocol)
+    )
+      throw new Error('APP_ORIGIN must be a canonical HTTP(S) origin');
+  }
+  if (
+    process.env.NODE_ENV === 'production' &&
+    (!process.env.DATABASE_URL || !process.env.APP_ORIGIN?.startsWith('https://'))
+  )
+    throw new Error('Production requires a database and explicit HTTPS APP_ORIGIN');
+  for (const [name, low, high] of [
+    ['AUTH_RATE_MAX', 1, 1000],
+    ['RETURN_WINDOW_DAYS', 0, 365],
+    ['COD_MAX_PAISE', 1, 100000000000],
+  ])
+    if (process.env[name] !== undefined) {
+      const value = Number(process.env[name]);
+      if (!Number.isSafeInteger(value) || value < low || value > high)
+        throw new Error('Invalid ' + name);
+    }
+}
+
+// One policy for API capability reporting and server-side order acceptance.
+export function ordersEnabled() {
+  if (process.env.NODE_ENV !== 'production') return true;
+  return process.env.RELEASE_MODE === 'production'
+    ? process.env.ACCEPT_LIVE_ORDERS === 'true'
+    : process.env.ALLOW_PREVIEW_ORDERS === 'true';
+}
