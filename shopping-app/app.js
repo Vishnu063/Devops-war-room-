@@ -14,12 +14,16 @@ let products = [],
   total = 0,
   sequence = 0,
   databaseMode = false,
+  checkoutEnabled = false,
   quote = null,
   pendingCheckout = null;
 const placeholder = '/assets/product-placeholder.svg';
 function image(name, src = placeholder, cls = '') {
   const img = node('img', cls);
   img.src = src;
+  img.addEventListener('error', () => {
+    if (img.getAttribute('src') !== placeholder) img.src = placeholder;
+  });
   img.alt = name;
   img.loading = 'lazy';
   img.width = 360;
@@ -63,8 +67,16 @@ function renderFilters() {
 async function renderProducts() {
   const run = ++sequence;
   $('catalogStatus').textContent = 'Loading products…';
+  $('productGrid').setAttribute('aria-busy', 'true');
+  $('catalogRetry').hidden = true;
   try {
-    const q = new URLSearchParams({ search, category, sort, page: String(page), limit: '8' });
+    const q = new URLSearchParams({
+      search,
+      category,
+      sort,
+      page: String(page),
+      limit: '8',
+    });
     const data = await api('/api/products?' + q);
     if (run !== sequence) return;
     products = data.items;
@@ -128,12 +140,26 @@ async function renderProducts() {
     $('previousPage').disabled = page <= 1;
     $('nextPage').disabled = page * 8 >= total;
   } catch (e) {
+    if (run !== sequence) return;
+    products = [];
+    total = 0;
+    $('productGrid').replaceChildren();
+    $('empty').hidden = true;
+    $('previousPage').disabled = true;
+    $('nextPage').disabled = true;
+    $('pageStatus').textContent = 'Catalog unavailable';
+    $('catalogRetry').hidden = false;
     $('catalogStatus').textContent = 'Catalog unavailable. ' + e.message;
+  } finally {
+    if (run === sequence) $('productGrid').setAttribute('aria-busy', 'false');
   }
 }
 async function addToCart(variantId) {
   const current = cart.find((x) => x.variantId === variantId);
-  await api('/api/cart', 'PUT', { variantId, quantity: (current?.quantity || 0) + 1 });
+  await api('/api/cart', 'PUT', {
+    variantId,
+    quantity: (current?.quantity || 0) + 1,
+  });
   await refreshShopping();
 }
 async function showProduct(id) {
@@ -156,6 +182,7 @@ async function showProduct(id) {
     ];
     const label = node('label', '', 'Choose variant'),
       select = node('select');
+    select.setAttribute('aria-label', 'Choose variant');
     for (const v of variants) {
       const option = node(
         'option',
@@ -170,6 +197,7 @@ async function showProduct(id) {
           ' available',
       );
       option.value = v.variantId;
+      option.disabled = v.stock <= 0;
       select.append(option);
     }
     label.append(select);
@@ -181,7 +209,15 @@ async function showProduct(id) {
       },
       'primary',
     );
-    add.disabled = !databaseMode || variants.every((v) => v.stock <= 0);
+    const available = variants.find((v) => v.stock > 0);
+    if (available) select.value = available.variantId;
+    function updateVariant() {
+      const selected = variants.find((v) => v.variantId === select.value);
+      add.disabled = !databaseMode || !selected || selected.stock <= 0;
+      add.textContent = selected?.stock > 0 ? 'Add selected variant' : 'Out of stock';
+    }
+    select.addEventListener('change', updateVariant);
+    updateVariant();
     body.append(label, add, node('h3', '', 'Customer reviews'));
     if (!p.reviews?.length) body.append(node('p', 'muted', 'No published reviews.'));
     for (const r of p.reviews || []) body.append(node('p', '', r.rating + '/5 — ' + r.body));
@@ -290,13 +326,18 @@ async function showDrawer(mode) {
             });
             await showDrawer('cart');
           } catch (e) {
+            quantity.value = p.quantity;
             notify(e.message);
           }
         });
         info.append(node('p', '', money(p.pricePaise)), quantity);
       }
       const remove = button('Remove', async () => {
-        if (mode === 'cart') await api('/api/cart', 'PUT', { variantId: p.variantId, quantity: 0 });
+        if (mode === 'cart')
+          await api('/api/cart', 'PUT', {
+            variantId: p.variantId,
+            quantity: 0,
+          });
         else await api('/api/wishlist/' + p.id, 'DELETE', {});
         await showDrawer(mode);
         await renderProducts();
@@ -306,23 +347,27 @@ async function showDrawer(mode) {
       root.append(row);
     }
     if (mode === 'cart' && cart.length) {
-      quote = await api('/api/cart/quote', 'POST', {});
-      foot.append(
-        node(
-          'p',
-          '',
-          'Subtotal ' + money(quote.subtotalPaise) + ' · Shipping ' + money(quote.shippingPaise),
-        ),
-        node('strong', '', 'Total ' + money(quote.totalPaise)),
-        button(
-          'Continue to checkout',
-          async () => {
-            $('drawer').close();
-            await openCheckout();
-          },
-          'primary',
-        ),
-      );
+      try {
+        quote = await api('/api/cart/quote', 'POST', {});
+        foot.append(
+          node(
+            'p',
+            '',
+            'Subtotal ' + money(quote.subtotalPaise) + ' · Shipping ' + money(quote.shippingPaise),
+          ),
+          node('strong', '', 'Total ' + money(quote.totalPaise)),
+          button(
+            'Continue to checkout',
+            async () => {
+              $('drawer').close();
+              await openCheckout();
+            },
+            'primary',
+          ),
+        );
+      } catch (error) {
+        foot.replaceChildren(node('p', 'muted', error.message + ' Update your bag to continue.'));
+      }
     }
   } catch (e) {
     root.textContent = e.message;
@@ -330,7 +375,10 @@ async function showDrawer(mode) {
 }
 async function openCheckout() {
   if (!cart.length) return notify('Your bag is empty');
-  $('checkoutStatus').textContent = 'Server totals are rechecked before recording the order.';
+  $('checkoutStatus').textContent = checkoutEnabled
+    ? 'Server totals are rechecked before recording the order.'
+    : 'Checkout is unavailable in this preview. No orders or payments will be accepted.';
+  $('placeOrder').disabled = !checkoutEnabled;
   $('checkoutTotal').textContent = money(quote.totalPaise);
   $('checkoutDialog').showModal();
 }
@@ -379,7 +427,10 @@ async function renderOrders(root) {
                 field('Return item', 'orderItemId', {
                   options: detail.items.map((i) => [i.id, i.name]),
                 }),
-                field('Return quantity', 'quantity', { type: 'number', value: '1' }),
+                field('Return quantity', 'quantity', {
+                  type: 'number',
+                  value: '1',
+                }),
                 field('Return reason', 'reason', {
                   type: 'textarea',
                   minLength: 5,
@@ -395,7 +446,10 @@ async function renderOrders(root) {
                     'Content-Type': 'application/json',
                     'Idempotency-Key': crypto.randomUUID(),
                   },
-                  body: JSON.stringify({ ...data, quantity: Number(data.quantity) }),
+                  body: JSON.stringify({
+                    ...data,
+                    quantity: Number(data.quantity),
+                  }),
                 }).then(async (response) => {
                   const body = await response.json();
                   if (!response.ok) throw new Error(body.error);
@@ -436,7 +490,10 @@ $('checkoutForm').addEventListener('submit', async (e) => {
       pendingCheckout = {
         key: crypto.randomUUID(),
         body: {
-          items: cart.map((x) => ({ variantId: x.variantId, quantity: x.quantity })),
+          items: cart.map((x) => ({
+            variantId: x.variantId,
+            quantity: x.quantity,
+          })),
           address: {
             recipient: data.recipient,
             phone: data.phone,
@@ -455,7 +512,10 @@ $('checkoutForm').addEventListener('submit', async (e) => {
     const response = await fetch('/api/orders', {
       method: 'POST',
       credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', 'Idempotency-Key': pendingCheckout.key },
+      headers: {
+        'Content-Type': 'application/json',
+        'Idempotency-Key': pendingCheckout.key,
+      },
       body: JSON.stringify(pendingCheckout.body),
     });
     const result = await response.json();
@@ -474,14 +534,15 @@ $('checkoutForm').addEventListener('submit', async (e) => {
     if (pendingCheckout)
       $('checkoutStatus').textContent += ' Retry preserves the same order request and key.';
   } finally {
-    submit.disabled = false;
+    submit.disabled = !checkoutEnabled;
     for (const control of form.elements)
       if (control !== submit) control.disabled = !!pendingCheckout;
   }
 });
 $('authForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const data = Object.fromEntries(new FormData(e.currentTarget)),
+  const authForm = e.currentTarget,
+    data = Object.fromEntries(new FormData(authForm)),
     register = $('registerChoice').checked;
   try {
     await api('/api/auth/' + (register ? 'register' : 'login'), 'POST', {
@@ -493,7 +554,7 @@ $('authForm').addEventListener('submit', async (e) => {
     await ensureSession();
     await refreshShopping();
     $('accountDialog').close();
-    e.currentTarget.reset();
+    authForm.reset();
     await renderProducts();
     notify('Signed in');
   } catch (error) {
@@ -525,6 +586,7 @@ $('sortSelect').addEventListener('change', async (e) => {
   await renderProducts();
 });
 $('searchInput').addEventListener('input', (e) => {
+  sequence++; // Invalidate responses already in flight before the debounce expires.
   search = e.target.value.trim();
   page = 1;
   clearTimeout(renderProducts.timer);
@@ -550,6 +612,17 @@ document.querySelectorAll('[data-category]').forEach((a) =>
     renderProducts();
   }),
 );
+$('catalogRetry').addEventListener('click', renderProducts);
+$('clearFilters').addEventListener('click', () => {
+  clearTimeout(renderProducts.timer);
+  search = category = '';
+  sort = 'featured';
+  page = 1;
+  $('searchInput').value = '';
+  $('sortSelect').value = sort;
+  renderFilters();
+  renderProducts();
+});
 closeButtons();
 async function start() {
   try {
@@ -579,6 +652,10 @@ async function start() {
       const config = await api('/api/config');
       $('checkoutForm').elements.paymentMethod.options[0].disabled = !config.codEnabled;
       $('checkoutForm').elements.paymentMethod.options[1].disabled = !config.onlineEnabled;
+      checkoutEnabled = config.ordersEnabled && (config.codEnabled || config.onlineEnabled);
+      $('placeOrder').disabled = !checkoutEnabled;
+      if (!config.codEnabled && config.onlineEnabled)
+        $('checkoutForm').elements.paymentMethod.value = 'RAZORPAY';
     }
   } catch (e) {
     $('catalogStatus').textContent = 'Application unavailable. ' + e.message;

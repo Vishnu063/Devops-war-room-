@@ -110,6 +110,8 @@ test('customer registration, preferences, persistent wishlist, purchase, shipmen
   await auth.getByLabel('Password', { exact: true }).fill('browser-customer-fixture-password');
   await auth.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(page.locator('#accountButton')).toHaveText('Customer');
+  await expect(page.locator('#authForm input[name="email"]')).toHaveValue('');
+  await expect(page.locator('#authStatus')).toHaveText('');
   const cookies = await page.context().cookies();
   const session = cookies.find((c) => c.name === 'novacart_session');
   expect(session.httpOnly).toBe(true);

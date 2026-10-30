@@ -346,6 +346,9 @@ try {
     !page.headers['content-security-policy']
   )
     throw new Error('TLS/header smoke failed');
+  const capabilities = await https('/api/config');
+  if (capabilities.status !== 200 || JSON.parse(capabilities.body).ordersEnabled !== false)
+    throw new Error('Preview capabilities must report disabled orders');
   const health = await https('/api/health');
   if (health.status !== 200 || JSON.parse(health.body).mode !== 'DATABASE')
     throw new Error('Database readiness failed');

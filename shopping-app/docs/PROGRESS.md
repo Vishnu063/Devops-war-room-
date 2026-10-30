@@ -4,7 +4,7 @@ Current branch: `feat/novacart-deployment`; application baseline: `feat/novacart
 
 ## Deployment follow-up
 
-See [DEPLOYMENT_DELIVERY.md](DEPLOYMENT_DELIVERY.md) for current evidence:69 unit/API tests,9 PostgreSQL scenarios and4 browser journeys passed in a fresh full application run. All17 candidate container checks passed, including previous-image rollback/roll-forward. All4 exact candidate image scans reported zero vulnerabilities. Authorized unused BuildKit cleanup and bounded fresh image builds resolved local verification. AWS connection, public HTTPS, actual Actions, offserver backups/alerts and production acceptance remain external gaps. The detailed application evidence below records the earlier commerce milestone; release gates are not automatically completed by local tests.
+See [DEPLOYMENT_DELIVERY.md](DEPLOYMENT_DELIVERY.md) for current evidence:70 unit/API tests,9 PostgreSQL scenarios and10 browser journeys passed in a fresh full application run. All17 candidate container checks passed, including previous-image rollback/roll-forward. All4 exact candidate image scans reported zero vulnerabilities. Authorized unused BuildKit cleanup and bounded fresh image builds resolved local verification. AWS connection, public HTTPS, actual Actions, offserver backups/alerts and production acceptance remain external gaps. Current feature audit and fixes: [WEBSITE_AUDIT.md](WEBSITE_AUDIT.md). PR #2 is Draft, a confirmed merge blocker; local main has no conflicts. The detailed application evidence below records the earlier commerce milestone; release gates are not automatically completed by local tests.
 
 ## Verified outcome
 

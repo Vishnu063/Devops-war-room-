@@ -4,6 +4,7 @@ India-first shopping application with a database-backed storefront, customer acc
 
 Run the Node service for integrated shopping; opening `index.html` directly cannot provide database or account workflows. The old `checkout-demo.html` remains an explicitly simulated standalone demo and is not the actual order checkout.
 
+- [Website audit, feature matrix and launch gaps](docs/WEBSITE_AUDIT.md)
 - [Deployment delivery, evidence and blockers](docs/DEPLOYMENT_DELIVERY.md)
 - [Application delivery report](docs/DELIVERY.md)
 - [Local setup and commands](backend/README.md)

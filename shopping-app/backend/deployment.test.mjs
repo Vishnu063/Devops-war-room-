@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { observe } from '../deploy/scripts/monitor.mjs';
 import { databaseIdentity } from '../deploy/scripts/backup.mjs';
-import { validateConfiguration } from './config.mjs';
+import { validateConfiguration, ordersEnabled } from './config.mjs';
 test('monitor triggers once after threshold and resolves once after recovery', () => {
   let state = { failures: 0, active: false };
   const events = [];
@@ -52,5 +52,29 @@ test('malformed private database URLs cannot leak credential input from startup 
   } finally {
     if (previous === undefined) delete process.env.DATABASE_URL;
     else process.env.DATABASE_URL = previous;
+  }
+});
+
+test('order capabilities use the same explicit release policy as checkout enforcement', () => {
+  const previous = { ...process.env };
+  try {
+    process.env.NODE_ENV = 'production';
+    delete process.env.RELEASE_MODE;
+    delete process.env.ALLOW_PREVIEW_ORDERS;
+    delete process.env.ACCEPT_LIVE_ORDERS;
+    assert.equal(ordersEnabled(), false);
+    process.env.RELEASE_MODE = 'preview';
+    process.env.ACCEPT_LIVE_ORDERS = 'true';
+    assert.equal(ordersEnabled(), false);
+    process.env.ALLOW_PREVIEW_ORDERS = 'true';
+    assert.equal(ordersEnabled(), true);
+    process.env.RELEASE_MODE = 'production';
+    delete process.env.ACCEPT_LIVE_ORDERS;
+    assert.equal(ordersEnabled(), false);
+    process.env.ACCEPT_LIVE_ORDERS = 'true';
+    assert.equal(ordersEnabled(), true);
+  } finally {
+    for (const k of Object.keys(process.env)) if (!(k in previous)) delete process.env[k];
+    Object.assign(process.env, previous);
   }
 });

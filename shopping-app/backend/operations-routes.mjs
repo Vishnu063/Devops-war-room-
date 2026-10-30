@@ -1,3 +1,4 @@
+import { ordersEnabled } from './config.mjs';
 import { database } from './db.mjs';
 import { principal, requireActor } from './shopping.mjs';
 import { requireOwner } from './identity.mjs';
@@ -33,6 +34,7 @@ export async function operationsRoutes(req, res, url, readJson) {
   if (path === '/api/config' && method === 'GET')
     return response({
       currency: 'INR',
+      ordersEnabled: !!process.env.DATABASE_URL && ordersEnabled(),
       database: !!process.env.DATABASE_URL,
       codEnabled: process.env.COD_ENABLED === 'true',
       onlineEnabled: !!(

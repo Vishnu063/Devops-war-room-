@@ -50,3 +50,11 @@ export function validateConfiguration() {
         throw new Error('Invalid ' + name);
     }
 }
+
+// One policy for API capability reporting and server-side order acceptance.
+export function ordersEnabled() {
+  if (process.env.NODE_ENV !== 'production') return true;
+  return process.env.RELEASE_MODE === 'production'
+    ? process.env.ACCEPT_LIVE_ORDERS === 'true'
+    : process.env.ALLOW_PREVIEW_ORDERS === 'true';
+}

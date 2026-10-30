@@ -2,17 +2,19 @@
 
 Assessment:30 October2026 (India). Branch:`feat/novacart-deployment`. **Local candidate verified; no public HTTPS preview deployed. Production readiness:NO.** Previous source milestone:`12eaa00`; delivery:`108193e`; main reconciliation:`2b5fed8`. Security/verification source commit:`19c66f3` (all4 image remediation and17-check acceptance).
 
+Latest website audit: [WEBSITE_AUDIT.md](WEBSITE_AUDIT.md). Current reports supersede prior counts:70 unit/API,9 SQL scenarios,10 browser journeys and17 container checks passed; all4 image scans report0 findings. PR #2 exists and is Draft; its status blocks merging, while local main reconciliation is clean. Older delivery references below are historical.
+
 ## Stage results
 
 | Stage | Status | Executed evidence | Remaining blocker |
 | --- | --- | --- | --- |
 | Disk cleanup | VERIFIED | Explicitly authorized local BuildKit prune; free space1.1→8.6GiB; repeated after bounded builds | Default VFS rebuild preflight still12GiB; at4.5GiB free needs7.5GiB more; explicit current-image reuse acceptance passed |
-| Unit/API tests | VERIFIED | npm ci, npm run check, npm test, npm run test:all;69 passed,0 failed/skipped | Independent production review |
+| Unit/API tests | VERIFIED | npm ci, npm run check, npm test, npm run test:all;70 passed,0 failed/skipped | Independent production review |
 | PostgreSQL tests | VERIFIED LOCAL |9 scenarios passed; migrations1–4 repeated; DB503→200 recovery | Real target DB not accessed |
-| Browser tests | VERIFIED LOCAL |4 Chromium journeys passed; tested axe views and static validation passed | Wider browsers/manual acceptance |
+| Browser tests | VERIFIED LOCAL |10 Chromium journeys passed; tested axe views and static validation passed | Wider browsers/manual acceptance |
 | Docker verification | VERIFIED LOCAL | All17 candidate checks passed, all health gates; UID1000 app/operations/proxy and UID70 database; private ports; disabled orders/payments | Actual EC2 compatibility/capacity |
 | Image security scans | VERIFIED LOCAL | All4 exact candidate IDs:0 CRITICAL/HIGH/MEDIUM/LOW/UNKNOWN; no severity exclusions | Scanner Alpine3.24 lifecycle warning; ongoing scans and independent review |
-| GitHub CI/CD | IMPLEMENTED/BLOCKED | Pinned workflows, actionlint/shell checks; current branches fetched, main already contained, remote branch matched | GitHub API CONNECT403; no PR, Actions run, protected-environment or registry publication verified |
+| GitHub CI/CD | IMPLEMENTED/BLOCKED | Pinned workflows, actionlint/shell checks; current branches fetched, main already contained, remote branch matched | GitHub API CONNECT403; PR #2 is Draft; Actions/protected environment and registry publication not verified |
 | EC2 infrastructure | BLOCKED | Current runtime:0 AWS identities/secrets/connections | Attach authorized cloud identity/access through environment settings |
 | HTTPS preview | LOCAL ONLY | CA-verified fixture TLS, access401/200, secure cookies and security headers | No actual host/domain, public certificate/renewal or verified public URL |
 | Backup and rollback | VERIFIED LOCAL | Encrypted snapshot/readback/empty+populated restore; authenticated-tamper rejection; monitor firing/resolved; distinct previous-image rollback and candidate roll-forward | Mock same-host object store; real offserver storage, external alerts and actual-host recovery unverified |
@@ -39,7 +41,7 @@ $ npm run test:deployment
 Node24 is required (.nvmrc24.22.2); application host tests used24.19.0, container candidate24.22.2, PostgreSQL16.15, Chromium154. Default VFS deployment runner requires12GiB free. For this constrained workspace, first execute the exact four fresh image builds in DEPLOYMENT.md, then:
 
 ```bash
-$ npm run test:deployment -- --reuse-images --rollback-image=sha256:88205bea76703091ceecdf02e5d4dd89e9f0cc529cea1c43e4ba47f5a6870783
+$ npm run test:deployment -- --reuse-images --rollback-image=sha256:a2a865a78a06d94fb985f716a3f22e67b4997c8202d57ec74408d84e33560f1f
 ```
 
 The previous image ID is the actual locally retained fixture; do not assume it exists on a fresh host. Omit --rollback-image if unavailable and mark previous-version rollback unverified there. Both runners own unique disposable resources; never point them at an existing or production database. No seeding/migration occurs on application startup.
@@ -56,6 +58,6 @@ Operator documents: ARCHITECTURE.md, DEPLOYMENT_AUDIT.md, ENVIRONMENT.md, DEPLOY
 
 ## Git review
 
-Review branch:`feat/novacart-deployment`. API access is blocked, so no PR URL or successful Actions run is claimed. Compare:
+Review branch:`feat/novacart-deployment`. PR #2 is confirmed Draft: https://github.com/Vishnu063/Devops-war-room-/pull/2. API access is blocked, so no successful Actions run or protection status is claimed. Compare:
 
 https://github.com/Vishnu063/Devops-war-room-/compare/main...feat/novacart-deployment

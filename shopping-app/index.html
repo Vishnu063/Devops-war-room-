@@ -68,15 +68,15 @@
         </div>
         <div class="categoryGrid">
           <a href="#shop" class="categoryTile" data-category="Home"
-            ><img src="/assets/editorial.svg" alt="Home furniture and accessories" /><span
+            ><img src="/assets/category-home.svg" alt="Home and living illustration" /><span
               >Home & Living <b>↗</b></span
             ></a
           ><a href="#shop" class="categoryTile" data-category="Lifestyle"
-            ><img src="/assets/editorial.svg" alt="Lifestyle footwear" /><span
+            ><img src="/assets/category-lifestyle.svg" alt="Lifestyle footwear illustration" /><span
               >Lifestyle <b>↗</b></span
             ></a
           ><a href="#shop" class="categoryTile" data-category="Tech"
-            ><img src="/assets/editorial.svg" alt="Headphones and technology" /><span
+            ><img src="/assets/category-tech.svg" alt="Technology illustration" /><span
               >Tech & More <b>↗</b></span
             ></a
           >
@@ -116,6 +116,8 @@
             <option value="name">Name: A to Z</option>
           </select></label
         >
+        <button type="button" id="clearFilters">Clear filters</button>
+        <button type="button" id="catalogRetry" hidden>Retry loading products</button>
         <p id="catalogStatus" role="status">Loading catalog…</p>
         <div id="productGrid" class="productGrid"></div>
         <div class="pagination">
@@ -297,7 +299,7 @@
           Any promotion or credit is validated by the server. Tax and delivery policies are
           provisional.
         </p>
-        <button class="primary" id="placeOrder">Place development order</button>
+        <button class="primary" id="placeOrder" disabled>Place development order</button>
         <p id="checkoutStatus" role="status" aria-live="polite"></p>
       </form>
     </dialog>
