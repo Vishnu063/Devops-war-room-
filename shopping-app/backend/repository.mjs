@@ -52,3 +52,11 @@ export async function quoteDatabaseCart(lines){
  if(!Number.isSafeInteger(subtotalPaise+shippingPaise))throw new Error("Total too large");
  return {items,subtotalPaise,shippingPaise,taxPaise:0,discountPaise:0,totalPaise:subtotalPaise+shippingPaise,currency:"INR",mode:"DATABASE_QUOTE_ONLY"};
 }
+
+export async function findProductById(id){
+ if(typeof id!=="string"||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))throw new Error("Invalid product ID");
+ const result=await database().query(`${baseSelect} AND p.id=$1::uuid ORDER BY v.id`,[id]);
+ if(result.rows.length===0)return null;
+ const first=result.rows[0];
+ return {id:first.id,slug:first.slug,name:first.name,description:first.description,category:first.category,variants:result.rows.map(v=>({variantId:v.variant_id,sku:v.sku,pricePaise:Number(v.pricePaise),stock:Number(v.stock)})),mode:"DATABASE"};
+}
