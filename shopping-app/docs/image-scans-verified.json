@@ -1,12 +1,12 @@
 {
   "assessmentDate": "2026-10-30",
-  "scope": "All four current website audit candidate images, exactly matching deployment-summary.json",
+  "scope": "Final website candidate including checkout saved-address picker and product gallery; exact IDs match deployment-summary.json",
   "scanner": "Trivy 0.67.2",
   "images": [
     {
       "service": "app",
       "image": "novacart-app:deployment-qa",
-      "imageID": "sha256:8b45869999d8be6d528e9cdc68cede2a66372dec022d1ae8188229a870538bb5",
+      "imageID": "sha256:65ee87b1df8ae39ee7db66f3b07269f17306e05b019949cc647d7e9a475b70c1",
       "counts": {
         "CRITICAL": 0,
         "HIGH": 0,
@@ -28,7 +28,7 @@
     {
       "service": "operations",
       "image": "novacart-operations:deployment-qa",
-      "imageID": "sha256:bcebb6cd9a97817a95c4372bd0bf5a8fac5bf19fa63709fc66a733961e2eb658",
+      "imageID": "sha256:d854d4c9a0f1341b3460e9b292ced7d51219d2ded0a29195df4563be06682248",
       "counts": {
         "CRITICAL": 0,
         "HIGH": 0,
@@ -85,7 +85,7 @@
     }
   ],
   "limitations": [
-    "Alpine3.24 is absent from scanner lifecycle list; vulnerability analysis completed.",
-    "No severity exclusions; zero reported findings is not independent penetration testing or public-host verification."
+    "Alpine3.24 absent from scanner lifecycle list; analysis completed.",
+    "No severity exclusions; no public-host or penetration-test acceptance implied."
   ]
 }

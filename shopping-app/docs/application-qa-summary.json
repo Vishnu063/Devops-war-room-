@@ -1,6 +1,6 @@
 {
-  "runId": "e0970a89ef504e8e",
-  "startedAt": "2026-10-30T10:51:39.501Z",
+  "runId": "a32adefa14b6873b",
+  "startedAt": "2026-10-30T10:59:39.222Z",
   "status": "VERIFIED_LOCAL",
   "checks": {
     "static-checks": {
@@ -50,33 +50,33 @@
   "localPerformance": [
     {
       "viewport": 1280,
-      "domContentLoadedMs": 265,
-      "transferBytes": 69628,
+      "domContentLoadedMs": 852,
+      "transferBytes": 72091,
       "scope": "Unthrottled loopback Chromium; not a production performance SLO"
     },
     {
       "viewport": 390,
-      "domContentLoadedMs": 289,
-      "transferBytes": 68842,
+      "domContentLoadedMs": 168,
+      "transferBytes": 71305,
       "scope": "Unthrottled loopback Chromium; not a production performance SLO"
     },
     {
       "viewport": 320,
-      "domContentLoadedMs": 162,
-      "transferBytes": 68842,
+      "domContentLoadedMs": 278,
+      "transferBytes": 71305,
       "scope": "Unthrottled loopback Chromium; not a production performance SLO"
     },
     {
       "viewport": 768,
-      "domContentLoadedMs": 212,
-      "transferBytes": 69628,
+      "domContentLoadedMs": 314,
+      "transferBytes": 72091,
       "scope": "Unthrottled loopback Chromium; not a production performance SLO"
     }
   ],
   "browser": "Chromium 154.0.8037.57 built on Debian GNU/Linux 13 (trixie)",
-  "nodePeakRss": "92192 kB",
-  "databaseResourceSample": "67.2MiB / 256MiB | 0.04%",
+  "nodePeakRss": "107456 kB",
+  "databaseResourceSample": "63.31MiB / 256MiB | 0.09%",
   "cleanup": "OWNED_RESOURCES_REMOVED",
-  "finishedAt": "2026-10-30T10:52:41.479Z",
+  "finishedAt": "2026-10-30T11:01:10.794Z",
   "nodeVersion": "v24.19.0"
 }

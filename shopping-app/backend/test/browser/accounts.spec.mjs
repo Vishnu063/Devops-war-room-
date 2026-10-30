@@ -129,15 +129,30 @@ test('customer registration, preferences, persistent wishlist, purchase, shipmen
   await page.locator('#cartButton').click();
   await page.getByRole('button', { name: 'Continue to checkout' }).click();
   const checkout = page.locator('#checkoutForm');
-  for (const [name, value] of Object.entries({
-    recipient: 'Fictional Buyer',
-    phone: '9876543210',
-    line1: '12 Browser Test Lane',
-    city: 'Bengaluru',
-    state: 'Karnataka',
-    pincode: '560001',
-  }))
-    await checkout.locator('[name="' + name + '"]').fill(value);
+  const saved = await request(
+    context,
+    '/api/addresses',
+    {
+      recipient: 'Fictional Buyer',
+      phone: '9876543210',
+      line1: '12 Browser Test Lane',
+      city: 'Bengaluru',
+      state: 'Karnataka',
+      pincode: '560001',
+    },
+    customerCookie,
+  );
+  expect(saved.status()).toBe(201);
+  const addressId = (await saved.json()).id;
+  // Reopen to fetch the newly saved account address.
+  await page.getByRole('button', { name: 'Close checkout', exact: true }).click();
+  await page.locator('#cartButton').click();
+  await page.getByRole('button', { name: 'Continue to checkout', exact: true }).click();
+  await page.getByLabel('Saved address', { exact: true }).selectOption(addressId);
+  await expect(checkout.getByLabel('Address line 1', { exact: true })).toHaveValue(
+    '12 Browser Test Lane',
+  );
+  await expect(checkout.getByLabel('PIN code', { exact: true })).toHaveValue('560001');
   await checkout.getByRole('button', { name: 'Place development order' }).click();
   await expect(page.locator('.orderCard').first()).toContainText('CONFIRMED');
   const order = (

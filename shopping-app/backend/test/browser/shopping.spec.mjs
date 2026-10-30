@@ -144,6 +144,10 @@ test('product detail skips sold-out variants and disables sold-out products', as
   await page.route(/\/api\/products\/[^/?]+$/, async (route) => {
     const response = await route.fetch();
     const product = await response.json();
+    product.images = [
+      { src: '/assets/category-home.svg', alt: 'Fictional gallery image one' },
+      { src: '/assets/category-tech.svg', alt: 'Fictional gallery image two' },
+    ];
     product.variants = [
       { variantId: 'fixture-empty', sku: 'SOLD-OUT', pricePaise: 10000, stock: 0 },
       {
@@ -156,6 +160,11 @@ test('product detail skips sold-out variants and disables sold-out products', as
     await route.fulfill({ response, json: product });
   });
   await page.locator('.productTitle').first().click();
+  await page.getByRole('button', { name: 'View product image 2', exact: true }).click();
+  await expect(page.locator('.detailImage')).toHaveAttribute('src', '/assets/category-tech.svg');
+  await expect(
+    page.getByRole('button', { name: 'View product image 2', exact: true }),
+  ).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByLabel('Choose variant', { exact: true })).toHaveValue('fixture-available');
   await expect(
     page.getByRole('button', { name: 'Add selected variant', exact: true }),

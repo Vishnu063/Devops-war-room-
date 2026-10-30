@@ -1,5 +1,5 @@
 {
-  "runId": "8e72592ac3b9",
+  "runId": "df8865cf8cae",
   "status": "VERIFIED_LOCAL_PREVIEW",
   "checks": [
     "Compose validation and private generated secrets",
@@ -24,12 +24,12 @@
     "Self-signed local TLS; HTTPS object-store mock is on the same Docker host. No real off-server provider, public deployment, certificate renewal verified; previous-image rollback is local only."
   ],
   "dockerDriver": "vfs",
-  "availableWorkspaceMiB": 4243,
+  "availableWorkspaceMiB": 3955,
   "imagesReused": true,
   "basicLoad": {
     "requests": 10,
     "concurrency": 2,
-    "p95Ms": 27,
+    "p95Ms": 64,
     "scope": "Small unthrottled local TLS sample, not capacity certification"
   },
   "alertEvidence": {
@@ -40,16 +40,16 @@
     "scope": "Actual local HTTPS outage/recovery observations, no external webhook delivery"
   },
   "rollbackEvidence": {
-    "previousImage": "sha256:a2a865a78a06d94fb985f716a3f22e67b4997c8202d57ec74408d84e33560f1f",
-    "candidateImage": "sha256:8b45869999d8be6d528e9cdc68cede2a66372dec022d1ae8188229a870538bb5",
+    "previousImage": "sha256:8b45869999d8be6d528e9cdc68cede2a66372dec022d1ae8188229a870538bb5",
+    "candidateImage": "sha256:65ee87b1df8ae39ee7db66f3b07269f17306e05b019949cc647d7e9a475b70c1",
     "scope": "Actual local previous-image rollback and roll-forward on compatible disposable schema; no production rollback or down-migration"
   },
   "images": {
     "database": "sha256:0ddee917ea78094b17189f94007af21e729b5ca205e0059180ef57eea34bb46b",
-    "app": "sha256:8b45869999d8be6d528e9cdc68cede2a66372dec022d1ae8188229a870538bb5",
-    "operations": "sha256:bcebb6cd9a97817a95c4372bd0bf5a8fac5bf19fa63709fc66a733961e2eb658",
+    "app": "sha256:65ee87b1df8ae39ee7db66f3b07269f17306e05b019949cc647d7e9a475b70c1",
+    "operations": "sha256:d854d4c9a0f1341b3460e9b292ced7d51219d2ded0a29195df4563be06682248",
     "nginx": "sha256:2fe946c05add7f65fcd732e2389be9aa554ea563243dbf0ae0a939505b214856"
   },
   "cleanup": "OWNED_PROJECT_REMOVED",
-  "finishedAt": "2026-10-30T10:54:55.100Z"
+  "finishedAt": "2026-10-30T11:03:46.221Z"
 }

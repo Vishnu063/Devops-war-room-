@@ -17,3 +17,5 @@ After sufficient storage is available, rebuild/verify the final candidate, repea
 ## Execution outcome
 
 Initial cleanup increased free space from about1.1GiB to8.6GiB (logical BuildKit total590.4MB; physical VFS savings were larger). Fresh candidate images were built in bounded batches with the normal proxy CA secret. A second authorized unused-cache cleanup left about4.5GiB before container acceptance. The full rebuild runner retains its conservative12GiB free-space preflight; at4.5GiB this needs at least7.5GiB additional free storage. Acceptance can explicitly reuse the exact freshly built images with3GiB required; that mode records image IDs and never claims a rebuild happened inside that invocation. No unsafe cleanup or other resource deletion was used.
+
+During the subsequent website audit, exact superseded NovaCart-only app/operations images were removed after positively identifying their IDs/workdir and retaining the newer candidate for rollback. This was not a global image prune. Unrelated images, all volumes/databases/source and existing applications were preserved. The final website report records the current image identities and rollback pair.

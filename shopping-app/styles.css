@@ -974,3 +974,27 @@ footer .brand span {
     min-height: 82px;
   }
 }
+
+.galleryThumbnails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+.galleryThumbnails button {
+  padding: 4px;
+  min-width: 64px;
+  min-height: 64px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: #e9ece1;
+}
+.galleryThumbnails button[aria-pressed='true'] {
+  border-color: #23352c;
+}
+.galleryThumbnails img {
+  display: block;
+  width: 64px;
+  height: 56px;
+  object-fit: contain;
+}

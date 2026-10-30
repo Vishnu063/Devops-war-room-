@@ -8,7 +8,7 @@ Assessment:30 October2026 (India). Branch:`feat/novacart-deployment`, baseline:`
 | --- | --- | --- | --- | --- |
 | Homepage, navigation and categories | VERIFIED LOCAL | Preserved design; mobile navigation available;3 distinct original category SVGs with truthful alt text | Guest journeys320/390/768/1280px, no overflow; image checks; mobile screenshot inspected | Owner content and licensed real catalog |
 | Search/filter/sort/pagination | VERIFIED LOCAL | Stale responses/errors ignored; failed grid cleared; aria-busy, retry and clear filters; existing server search/pricing/pagination | Real SQL discovery plus browser failure/empty/retry | Representative large-catalog UX/load |
-| Product detail and variants | VERIFIED LOCAL | Sold-out options disabled, first available selected, add button follows selection; explicit accessible label | Browser mixed/all-sold-out variant fixtures; SQL variant/inventory tests | Full multi-image gallery is not implemented; real media approval |
+| Product detail and variants | VERIFIED LOCAL | Sold-out options disabled, first available selected, add button follows selection; explicit accessible label | Browser mixed/all-sold-out variant fixtures; SQL variant/inventory tests | Thumbnail gallery implemented and browser-tested; real media approval |
 | Product URLs/SEO | VERIFIED LOCAL | Existing deep link preserved; server metadata/canonical/escaping/noindex | New direct slug URL browser regression; SQL SEO escaping | Crawl acceptance and final public origin |
 | Images/cards/touch targets | VERIFIED LOCAL | Safe illustration fallback on broken product images; aligned card controls; larger44px wishlist/action targets | Browser broken-image fixture;4 viewport no-overflow and axe-tested views | Product illustrations remain placeholders; not real photographs |
 | Cart and wishlist | VERIFIED LOCAL | Persistent guest/customer/merge; quotation failure retains removal controls; rejected quantity restored | SQL persistence/merge; reload/wishlist and new quote-conflict recovery browser test | Wider manual UX acceptance |
@@ -16,7 +16,7 @@ Assessment:30 October2026 (India). Branch:`feat/novacart-deployment`, baseline:`
 | Registration/login/account | VERIFIED LOCAL | Capture submitted form before awaits, safely reset after sign-in; role/session boundaries preserved | Browser reset regression, SQL roles/revocation/expiry | Independent review/recovery operations |
 | Reset/verification/MFA | VERIFIED CONTRACTS | Hashed one-use identity tokens, revocation, owner TOTP/replay/freshness | SQL reset/verify/owner MFA and unit tests | Actual email delivery and controlled owner recovery; not all flows browser-tested |
 | Checkout and pricing | VERIFIED LOCAL | Shared release policy reports ordersEnabled; submit disabled until capability load; clear preview-unavailable message; server enforcement unchanged | Unit policy matrix, real SQL integer-paise/idempotency/discounts; browser disabled checkout; production-style HTTP503 gate | Approved tax/COD/payment policies and launch approval |
-| Saved addresses | IMPLEMENTED/SQL VERIFIED | Encrypted account address book and ownership guards | SQL ciphertext/ownership and existing API coverage | Choosing a saved address directly at checkout remains a UI gap; manual address entry works |
+| Saved addresses | VERIFIED LOCAL | Encrypted account address book, ownership guards and selectable checkout addresses with manual-entry fallback | SQL ciphertext/ownership plus browser saved-address selection and field population | Actual address/delivery policy |
 | Orders/history/cancellation | VERIFIED LOCAL | Atomic inventory reservation, immutable snapshot, idempotency, owner-only operations |9 SQL scenarios include last-unit concurrency, duplicate requests, ownership/cancel; customer/guest browser | Real commerce authorization and reconciliation |
 | Shipping/tracking | VERIFIED MANUAL CONTRACTS | Owner PACKING/SHIPPED/DELIVERED, carrier/reference and customer timeline | SQL and customer browser shipment lifecycle | Courier account, dispatch and actual deliveries |
 | Returns/refunds | VERIFIED LOCAL CONTRACTS | Partial returns, review/restock, credit/refund intents and state safety | SQL duplicate/partial/cash/provider-mock cases; browser request | Real provider refunds/settlement and approved policy |
@@ -41,9 +41,12 @@ Assessment:30 October2026 (India). Branch:`feat/novacart-deployment`, baseline:`
 
 Product deep links were initially suspected during the audit but were already implemented at the end of startup. No speculative route rewrite was made; a direct URL regression now verifies the existing behavior.
 
+10. Complete the identified checkout-address gap: load the signed-in account address book, populate validated address fields on selection, preserve manual entry and pending-request protection.
+11. Complete the detail-gallery gap: accessible thumbnail controls switch the main image and expose selected state; browser fixtures verify the interaction without inventing real product photography.
+
 ## Executed evidence and failures
 
-Fresh application run: **70 unit/API passed,9 PostgreSQL scenarios passed,10 Chromium journeys passed;0 final failures/skips**. Static HTML/ESLint and dependency audit passed. axe found0 violations on tested storefront/account-support/product/owner views; it is not exhaustive accessibility certification. Guest purchase/cancel runs at320,390,768 and1280px; owner workflow is desktop. Additional journeys cover recovery/error/empty states, variants, shared product URL and cart quotation conflict. Variant states and preview capabilities in dedicated browser negatives are mocked responses; checkout/inventory/ownership paths also have real SQL/API coverage.
+Fresh application run: **70 unit/API passed,9 PostgreSQL scenarios passed,10 Chromium journeys passed;0 final failures/skips**. Static HTML/ESLint and dependency audit passed. axe found0 violations on tested storefront/account-support/product/owner views; it is not exhaustive accessibility certification. Guest purchase/cancel runs at320,390,768 and1280px; owner workflow is desktop. Additional journeys cover recovery/error/empty states, variants/gallery selection, shared product URL, saved checkout addresses and cart quotation conflict. Variant states and preview capabilities in dedicated browser negatives are mocked responses; checkout/inventory/ownership paths also have real SQL/API coverage.
 
 The first expanded run failed an exact implicit-label lookup; an explicit accessible label fixed it. The next failed because the framework's disabled-state matcher treated an option with its native disabled property set as enabled; the regression now checks the actual DOM disabled property. Final full application rerun passed10 browser tests. These failed attempts are not counted as passing results.
 
@@ -61,4 +64,16 @@ Current environment reports no authorized AWS identities, secret bindings or con
 
 Before a public preview: inspect actual EC2 OS/capacity/ports/containers/Nginx, use a verified owned NovaCart subdomain or propose a restricted secure temporary tunnel, and configure real certificate/renewal, offserver backup/readback/restore and external monitoring. Stop for explicit approval before changing public DNS/firewall/existing routing or incurring charges. No credentials are requested in chat.
 
-Before real customers: approved catalog/media, seller/legal/privacy/retention/contact/return rules, GST/statutory invoices, gateway sandbox and live activation approval, actual mail/courier, reconciliation, broader owner/browser/manual accessibility/load acceptance and independent security review. Saved-address selection at checkout and multi-image detail gallery remain UI scope gaps; production readiness is not claimed. Real orders/payments remain disabled in the preview configuration.
+Before real customers: approved catalog/media, seller/legal/privacy/retention/contact/return rules, GST/statutory invoices, gateway sandbox and live activation approval, actual mail/courier, reconciliation, broader owner/browser/manual accessibility/load acceptance and independent security review. Saved-address selection and the multi-image detail gallery were completed during this audit and browser-verified; production readiness is not claimed. Real orders/payments remain disabled in the preview configuration.
+
+## Local commands and final operator state
+
+```bash
+$ cd /workspace/Devops-war-room-/shopping-app/backend
+$ npm run check
+$ npm test
+$ npm run test:all
+$ npm run test:deployment -- --reuse-images --rollback-image=sha256:8b45869999d8be6d528e9cdc68cede2a66372dec022d1ae8188229a870538bb5
+```
+
+The last command was executed after freshly building the current app/operations source; unchanged database/proxy IDs were also rescanned. Image IDs, actual rollback pair,17 passing checks and cleanup are recorded in deployment-summary.json. A fresh machine must build the exact current images first (DEPLOYMENT.md); do not assume that retained prior fixture image exists. Default full-build runner requires12GiB free with VFS, versus3GiB for explicit image reuse. About3.9GiB remained after final cleanup; a new all-in-one VFS rebuild would need about8.1GiB additional free space. All owned test containers were removed. Tracked credential-pattern scanning found0 matches, with no values printed; this is limited detection. No source reset, force push, production data deletion or unrelated resource cleanup occurred.

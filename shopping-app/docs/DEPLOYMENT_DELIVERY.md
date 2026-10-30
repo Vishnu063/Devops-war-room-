@@ -41,7 +41,7 @@ $ npm run test:deployment
 Node24 is required (.nvmrc24.22.2); application host tests used24.19.0, container candidate24.22.2, PostgreSQL16.15, Chromium154. Default VFS deployment runner requires12GiB free. For this constrained workspace, first execute the exact four fresh image builds in DEPLOYMENT.md, then:
 
 ```bash
-$ npm run test:deployment -- --reuse-images --rollback-image=sha256:a2a865a78a06d94fb985f716a3f22e67b4997c8202d57ec74408d84e33560f1f
+$ npm run test:deployment -- --reuse-images --rollback-image=sha256:8b45869999d8be6d528e9cdc68cede2a66372dec022d1ae8188229a870538bb5
 ```
 
 The previous image ID is the actual locally retained fixture; do not assume it exists on a fresh host. Omit --rollback-image if unavailable and mark previous-version rollback unverified there. Both runners own unique disposable resources; never point them at an existing or production database. No seeding/migration occurs on application startup.

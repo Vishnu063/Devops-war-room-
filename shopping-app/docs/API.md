@@ -106,3 +106,7 @@ Same key and payload replays the original result (200); new order returns 201; a
 | POST | `/api/admin/maintenance` | `{}`; bounded reservation expiry, consent recovery queue and configured mail |
 
 Use the owner forms as field-level examples and source validation as the authoritative contract. Endpoint coverage does not imply externally verified service or policy approval.
+
+## Preview checkout capability
+
+GET /api/config includes ordersEnabled, derived from the same release policy enforced by POST /api/orders. It is false without a database or when the release disables acceptance. The storefront keeps submit disabled until capability loading succeeds and a payment method is enabled; this is presentation only, and the server still rejects disabled orders. Account checkout can select a saved address from the owner-scoped GET /api/addresses result, populating the ordinary server-validated address fields. No browser price or authorization decision is trusted.

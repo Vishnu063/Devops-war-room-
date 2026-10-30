@@ -15,6 +15,7 @@ let products = [],
   sequence = 0,
   databaseMode = false,
   checkoutEnabled = false,
+  savedAddresses = [],
   quote = null,
   pendingCheckout = null;
 const placeholder = '/assets/product-placeholder.svg';
@@ -168,15 +169,32 @@ async function showProduct(id) {
     $('detailTitle').textContent = p.name;
     const body = $('productDetail');
     body.replaceChildren();
-    body.append(
-      image(
+    const gallery = node('div', 'productGallery'),
+      mainImage = image(
         p.images?.[0]?.alt || 'Illustration — ' + p.name,
         p.images?.[0]?.src || placeholder,
         'detailImage',
-      ),
-      node('p', 'eyebrow', p.category),
-      node('p', '', p.description),
-    );
+      );
+    gallery.append(mainImage);
+    if (p.images?.length > 1) {
+      const thumbnails = node('div', 'galleryThumbnails');
+      thumbnails.setAttribute('role', 'group');
+      thumbnails.setAttribute('aria-label', 'Product images');
+      p.images.forEach((media, index) => {
+        const choose = button('', () => {
+          mainImage.src = media.src;
+          mainImage.alt = media.alt || p.name;
+          for (const control of thumbnails.children)
+            control.setAttribute('aria-pressed', String(control === choose));
+        });
+        choose.setAttribute('aria-label', 'View product image ' + (index + 1));
+        choose.setAttribute('aria-pressed', String(index === 0));
+        choose.append(image('', media.src));
+        thumbnails.append(choose);
+      });
+      gallery.append(thumbnails);
+    }
+    body.append(gallery, node('p', 'eyebrow', p.category), node('p', '', p.description));
     const variants = p.variants || [
       { variantId: p.id, pricePaise: p.pricePaise, stock: p.stock, sku: p.sku },
     ];
@@ -381,7 +399,38 @@ async function openCheckout() {
   $('placeOrder').disabled = !checkoutEnabled;
   $('checkoutTotal').textContent = money(quote.totalPaise);
   $('checkoutDialog').showModal();
+  savedAddresses = [];
+  const select = $('savedAddress');
+  select.replaceChildren();
+  const manual = node('option', '', 'Enter a new address');
+  manual.value = '';
+  select.append(manual);
+  $('savedAddressRow').hidden = true;
+  if (user && !pendingCheckout) {
+    try {
+      savedAddresses = (await api('/api/addresses')).items;
+      for (const address of savedAddresses) {
+        const option = node(
+          'option',
+          '',
+          address.recipient + ' · ' + address.city + ' · ' + address.pincode,
+        );
+        option.value = address.id;
+        select.append(option);
+      }
+      $('savedAddressRow').hidden = !savedAddresses.length;
+    } catch {
+      $('checkoutStatus').textContent +=
+        ' Saved addresses could not load; enter an address manually.';
+    }
+  }
 }
+$('savedAddress').addEventListener('change', (event) => {
+  if (pendingCheckout) return;
+  const address = savedAddresses.find((item) => item.id === event.target.value);
+  for (const name of ['recipient', 'phone', 'line1', 'line2', 'city', 'state', 'pincode'])
+    $('checkoutForm').elements[name].value = address?.[name] || '';
+});
 async function renderOrders(root) {
   const orders = (await api('/api/orders')).items;
   if (!orders.length) root.append(node('p', '', 'No orders recorded.'));
