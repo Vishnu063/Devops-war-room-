@@ -1,41 +1,31 @@
-# NovaCart deployment delivery
+# NovaCart final deployment verification
 
-Assessment: 30 October 2026 (India). Branch: `feat/novacart-deployment`. **Not production-ready; no verified public preview URL.** Main was reconciled in merge `2b5fed8`; deployment source commit: `12eaa00` (isolated preview deployment and operations handoff).
+Assessment:30 October2026 (India). Branch:`feat/novacart-deployment`. **Local candidate verified; no public HTTPS preview deployed. Production readiness:NO.** Previous source milestone:`12eaa00`; delivery:`108193e`; main reconciliation:`2b5fed8`. The new security/verification commit is recorded in Git history and the final delivery note.
 
-## Delivered
+## Stage results
 
-Digest-pinned nonroot app/operations/proxy containers, isolated PostgreSQL, loopback-only preview HTTPS with access restriction, secret-file loading, disabled live commerce, separate checksummed release migrations, encrypted snapshot backup/readback/disposable restore, monitoring transitions, protected manual release/deploy workflow definitions and isolated acceptance runner. No real order/payment/provider activation, public routing, DNS/firewall modification, cloud infrastructure change or additional AWS resource was performed.
+| Stage | Status | Executed evidence | Remaining blocker |
+| --- | --- | --- | --- |
+| Disk cleanup | VERIFIED | Explicitly authorized local BuildKit prune; free space1.1→8.6GiB; repeated after bounded builds | Default VFS rebuild preflight still12GiB; at4.5GiB free needs7.5GiB more; explicit current-image reuse acceptance passed |
+| Unit/API tests | VERIFIED | npm ci, npm run check, npm test, npm run test:all;69 passed,0 failed/skipped | Independent production review |
+| PostgreSQL tests | VERIFIED LOCAL |9 scenarios passed; migrations1–4 repeated; DB503→200 recovery | Real target DB not accessed |
+| Browser tests | VERIFIED LOCAL |4 Chromium journeys passed; tested axe views and static validation passed | Wider browsers/manual acceptance |
+| Docker verification | VERIFIED LOCAL | All17 candidate checks passed, all health gates; UID1000 app/operations/proxy and UID70 database; private ports; disabled orders/payments | Actual EC2 compatibility/capacity |
+| Image security scans | VERIFIED LOCAL | All4 exact candidate IDs:0 CRITICAL/HIGH/MEDIUM/LOW/UNKNOWN; no severity exclusions | Scanner Alpine3.24 lifecycle warning; ongoing scans and independent review |
+| GitHub CI/CD | IMPLEMENTED/BLOCKED | Pinned workflows, actionlint/shell checks; current branches fetched, main already contained, remote branch matched | GitHub API CONNECT403; no PR, Actions run, protected-environment or registry publication verified |
+| EC2 infrastructure | BLOCKED | Current runtime:0 AWS identities/secrets/connections | Attach authorized cloud identity/access through environment settings |
+| HTTPS preview | LOCAL ONLY | CA-verified fixture TLS, access401/200, secure cookies and security headers | No actual host/domain, public certificate/renewal or verified public URL |
+| Backup and rollback | VERIFIED LOCAL | Encrypted snapshot/readback/empty+populated restore; authenticated-tamper rejection; monitor firing/resolved; distinct previous-image rollback and candidate roll-forward | Mock same-host object store; real offserver storage, external alerts and actual-host recovery unverified |
 
-The storefront and commerce implementation is documented in DELIVERY.md and PROGRESS.md. All30 roadmap items remain individually tracked; external acceptance gaps remain open. Source configurations do not establish that CI ran, artifacts were published, or a server was deployed.
+All tests/counts refer to executed runs: application-qa-summary.json and deployment-summary.json. The candidate app/operations/database/proxy images were freshly built explicitly, then passed the documented --reuse-images acceptance mode. Exact IDs match image-scans-verified.json. The runner did not rebuild them during that invocation. Test resources were cleaned up; no running preview is implied.
 
-## Executed evidence
+## Security fixes and failure diagnosis
 
-| Scope | Result | Evidence / limit |
-| --- | --- | --- |
-| Latest unit/API |69 passed,0 failed/skipped | `npm test`; includes startup URL error redaction regression |
-| Static/workflows | Passed | ESLint/HTML, actionlint1.7.7, shell syntax and Git whitespace checks |
-| Earlier full application run |68 unit/API,9 PostgreSQL scenarios,4 Chromium journeys passed | application-qa-summary.json; Node24.19.0/PG16.15; tested axe views and dependency audit passed |
-| Baseline container acceptance |16 checks passed | deployment-summary.json; prior Node24.19 candidate, not final image acceptance |
-| Patched images | App/operations/proxy builds completed | Node24.22.2, OpenSSL3.5.9-r0 in final app |
-| Final app image scan |0 vulnerabilities reported | image-scan-final.json, exact image ID; scanner lifecycle-list warning retained |
-| Remaining image scans | Incomplete | Operations export exhausted disk; proxy/database scans not reached; CI gates all4 images |
-| Final container acceptance | Blocked | deployment-final-attempt.json; empty backup/restore passed before PostgreSQL disk exhaustion during migration |
-| Disk preflight | Correct refusal | Latest invocation required3GiB free for reused images; no test services created with about1.1GiB available |
-| Cleanup | Verified | No Docker containers remain; optional test profiles included by cleanup; unrelated resources preserved |
-| Real EC2/HTTPS/Actions | Not run | No authorized AWS identity or connection; GitHub API policy blocks PR/Actions operations |
+All four images were scanned before remediation. The inherited PostgreSQL gosu helper had1 CRITICAL/25 HIGH Go findings; it is unused once the database starts directly as postgres UID70, so it was removed from database and operations. Operations remains UID1000. Proxy Brotli/curl had1 CRITICAL/2 HIGH; unused optional modules/curl were removed offline, preserving core TLS/HTTP. All four rebuilt images scanned clean. No checks, severity gates or TLS verification were bypassed. Scanner0.67.2 warns Alpine3.24 is absent from its lifecycle list; zero reported findings is not a security warranty.
 
-Baseline container checks include canonical CA-verified local HTTPS, access denial, secure cookies, customer/owner authorization, disabled orders, private ports, restricted database role, migration backup/checksum gates, encrypted populated restore and authenticated-tamper rejection, real monitor failures/recovery. The mock object store runs on the same Docker host. It is not an offserver backup. Local self-signed certificates do not verify public certificate issuance or renewal. Same-image recovery does not verify previous-version rollback.
+The first new rollback smoke raced the restarted proxy listener and failed with socket hang up. A bounded readiness wait fixed that test; the full17-check rerun passed. Earlier disk-exhaustion evidence is retained historically in deployment-final-attempt.json, and pre-remediation passing image evidence in deployment-pre-remediation.json. The final passing report supersedes both. Tracked private-key/AWS/GitHub credential pattern scanning found0 matching files, with no values printed; this is limited detection, not a guarantee against all possible secrets.
 
-## Remaining blockers
-
-1. Free verification storage or explicitly authorized clearing of unused BuildKit cache in this disposable workspace. See CACHE_CLEANUP_PROPOSAL.md. Do not prune other projects automatically. Rebuild/retest the final source and scan all images before release.
-2. Attach the authorized AWS identity through cloud environment settings. Current status has no outbound identities/secrets/runtime variables and an empty connection manifest. Then discover actual EC2/AMI, confirm Ubuntu username, and inspect OS/RAM/disk/containers/Nginx/ports read-only. Preserve existing applications. No host/IP/domain was guessed.
-3. Review/save/publish the environment draft: retained setup plus NovaCart dependencies/start instructions; custom domains retained Playwright and added api.github.com and dl-cdn.alpinelinux.org. Saving the draft did not activate these or create AWS credentials. Repository membership was preserved because other roots had unreadable/ambiguous metadata; new-task restoration is unverified.
-4. Configure approved registry access, GitHub protected environment with reviewers, strict SSH host verification, real offserver encrypted backup/readback/restore, alert destination and public certificate lifecycle. Execute the actual workflows and approved-host acceptance.
-5. Follow the owner preference: verified owned NovaCart subdomain, otherwise an access-restricted secure temporary tunnel. Stop for approval before changing existing public routing/DNS/firewall or incurring charges. Keep app and PostgreSQL private; preview only, fictional data, no real payment processing.
-6. Production additionally needs real gateway sandbox/SMTP/courier evidence, business/tax/legal/retention policy and independent security/release approval. See RELEASE_CHECKLIST.md. Production readiness remains **NO**.
-
-## Exact local checks
+## Exact local run commands
 
 ```bash
 $ cd /workspace/Devops-war-room-/shopping-app/backend
@@ -46,16 +36,26 @@ $ npm run test:all
 $ npm run test:deployment
 ```
 
-Use Node24 (.nvmrc pins24.22.2). test:all starts only disposable fixtures; test:deployment owns its unique Compose project and private generated secrets, fictional database and loopback TLS. Requires local Docker; VFS preflight requires12GiB free for build/test or3GiB with explicit --reuse-images. Do not run against an existing or production database. See DEPLOYMENT.md for manual preview startup only after approved-host checks; no production migrations or seeding on application startup.
+Node24 is required (.nvmrc24.22.2); application host tests used24.19.0, container candidate24.22.2, PostgreSQL16.15, Chromium154. Default VFS deployment runner requires12GiB free. For this constrained workspace, first execute the exact four fresh image builds in DEPLOYMENT.md, then:
 
-## Operator handoff
+```bash
+$ npm run test:deployment -- --reuse-images --rollback-image=sha256:88205bea76703091ceecdf02e5d4dd89e9f0cc529cea1c43e4ba47f5a6870783
+```
 
-Start with ENVIRONMENT.md and DEPLOYMENT_AUDIT.md; follow DEPLOYMENT.md, DATABASE_OPERATIONS.md, BACKUP_RESTORE.md, CI_CD.md, SECURITY.md, ROLLBACK.md and RELEASE_CHECKLIST.md. These cover the requested architecture, environment, migrations, backups, release, rollback, security and operations responsibilities. Application acceptance is in ACCEPTANCE.md and all30 task statuses in PROGRESS.md. Public preview URL: **none verified**. No deployment or production completion is claimed.
+The previous image ID is the actual locally retained fixture; do not assume it exists on a fresh host. Omit --rollback-image if unavailable and mark previous-version rollback unverified there. Both runners own unique disposable resources; never point them at an existing or production database. No seeding/migration occurs on application startup.
+
+## Remaining access-dependent handoff
+
+1. Review/save/publish the saved environment draft. It preserves existing setup and adds NovaCart install/start instructions plus retained Playwright and proposed GitHub API/Alpine domains. Saving did not apply network changes or create AWS credentials. Repository membership was preserved because other roots had unreadable/ambiguous metadata; new-task restoration is unverified.
+2. Attach authorized AWS access through environment settings. ENVIRONMENT.md contains read-only discovery/host commands. Discover the actual instance/IP/AMI, confirm ubuntu from configuration, inspect OS/RAM/disk/CPU/Docker/Nginx/ports and preserve existing sites. Do not request keys/passwords in chat or guess targets.
+3. Follow DEPLOYMENT.md and DATABASE_OPERATIONS.md for dedicated private Compose setup and separate verified-backup-gated migrations. Preview only, fictional data, no real orders or payments. Use a verified owned NovaCart subdomain or propose restricted secure temporary tunnel after host discovery. Stop before public DNS/firewall/existing routing changes or charges without owner approval.
+4. Configure protected GitHub environment/reviewers, approved registry and strict SSH host identity; execute actual workflows. Configure real offserver encrypted backup/readback/restore, key escrow, external alerts, certificate renewal and target rollback. No such account/action is verified here.
+5. Production additionally requires gateway sandbox, actual SMTP/courier, business/GST/legal/retention decisions, broader security/UX/load acceptance and explicit launch authorization. All30 roadmap statuses remain in PROGRESS.md; local checks do not close external release gates.
+
+Operator documents: ARCHITECTURE.md, DEPLOYMENT_AUDIT.md, ENVIRONMENT.md, DEPLOYMENT.md, DATABASE_OPERATIONS.md, BACKUP_RESTORE.md, CI_CD.md, SECURITY.md, ROLLBACK.md and RELEASE_CHECKLIST.md. Previous application delivery is in DELIVERY.md. **Verified public preview URL:none.** No EC2 deployment, public routing/DNS/firewall change, live commerce, main merge, branch-protection change or cloud resource creation occurred.
 
 ## Git review
 
-Source milestone: `12eaa00`; main reconciliation: `2b5fed8`. Review branch: `feat/novacart-deployment`. Pull request creation is blocked by the current GitHub API network policy; no PR URL or successful Actions execution is claimed. Open the branch comparison after the push completes:
+Review branch:`feat/novacart-deployment`. API access is blocked, so no PR URL or successful Actions run is claimed. Compare:
 
 https://github.com/Vishnu063/Devops-war-room-/compare/main...feat/novacart-deployment
-
-The source commit plus this delivery-record follow-up preserve the implementation and exact test limitations. No main merge, force push or release publication was performed.

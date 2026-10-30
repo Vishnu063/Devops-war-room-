@@ -48,3 +48,20 @@ Owner selects EC2/new server, authorized access, domain/free preview service, va
 Optional monitoring and backup profiles remain off until configured. A published preview must stay authenticated, fictional and transaction-disabled. Production requires RELEASE_CHECKLIST.md and separate explicit approval. The safe rollout script accepts only an approved immutable image and does not migrate or seed automatically.
 
 Certificate renewal must refresh the mounted files and recreate the dedicated Nginx container (individual file bind mounts retain old inodes after atomic replacement). Test the owner-selected ACME staging/renewal flow and private-key ownership on the actual host; neither issuance nor automatic renewal was performed here.
+
+## Image hardening and bounded VFS verification
+
+Compose builds a dedicated `database` target from the pinned PostgreSQL16 base. It removes the unused gosu binary and runs UID70 from startup, including initialization. New named volumes inherit the image directory's postgres ownership. Operations derives from this hardened database stage and runs UID1000; optional unused Nginx modules/curl are removed offline. Existing data-volume ownership must be reviewed; never recursively chown unknown user data to make initialization pass.
+
+On this space-constrained VFS executor, all four images were built explicitly before running the documented `--reuse-images` acceptance mode. It verifies actual current candidate image IDs rather than pretending the runner rebuilt them. To reproduce those bounded builds from shopping-app (supply the managed proxy CA secret where needed):
+
+```bash
+$ docker build --target database -t novacart-database:deployment-qa .
+$ docker build -t novacart-nginx:deployment-qa deploy/nginx
+$ docker build --target app --secret "id=proxy_ca,src=$CODEX_PROXY_CERT" -t novacart-app:deployment-qa .
+$ docker build --target operations --secret "id=proxy_ca,src=$CODEX_PROXY_CERT" -t novacart-operations:deployment-qa .
+$ cd backend
+$ npm run test:deployment -- --reuse-images
+```
+
+Check available disk before every batch. Global BuildKit pruning is never automatic: it was separately authorized for this disposable workspace only. Default all-in-one rebuild acceptance still requires12GiB on VFS. The optional `--rollback-image=sha256:<full-local-image-id>` adds a genuine distinct previous-image rollback and roll-forward smoke against the disposable compatible schema. It never pulls or selects a previous image automatically. See ROLLBACK.md and deployment-summary.json for executed evidence and limitations.

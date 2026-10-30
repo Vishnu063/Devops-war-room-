@@ -8,7 +8,7 @@ Use a new private directory outside Git, mode0700, or an approved secret manager
 | `PREVIEW_HTTPS_PORT` | Unprivileged loopback HTTPS publication; default8443 |
 | `PREVIEW_HOST` | Same canonical host:port for internal monitor Host validation |
 | `SECRETS_DIRECTORY` | Absolute protected input directory |
-| `APP_IMAGE`, `OPERATIONS_IMAGE`, `NGINX_PROXY_IMAGE` | Reviewed tags for development; immutable digests for release |
+| `APP_IMAGE`, `OPERATIONS_IMAGE`, `DATABASE_IMAGE`, `NGINX_PROXY_IMAGE` | Reviewed tags for development; immutable digests for release |
 | `NODE_IMAGE`, `POSTGRES_IMAGE`, `NGINX_IMAGE` | Committed digest-pinned base defaults; review updates explicitly |
 | `app_url`, `migrator_url`, `backup_url` | Separate private PostgreSQL URLs, mounted only where required |
 | `admin_password`, `app_password`, `migrator_password`, `backup_password` | Initialization passwords for a new database volume |
@@ -47,3 +47,16 @@ $ sudo -n ufw status verbose
 ```
 
 Inspect existing Nginx locally without publishing raw configurations that may contain credentials. Confirm available loopback ports and resource limits. A new private Compose project must not replace existing applications. A temporary tunnel must keep preview authentication, canonical HTTPS origin and certificate verification; do not use TLS-bypass flags. Actual endpoint, certificate/renewal, smoke and access-denial checks remain required before reporting a working URL.
+
+## Authorized AWS discovery commands
+
+After a ready AWS connection appears in the managed manifest, select only its actual alias/config path as described by the runtime skill. With that command-scoped profile, start read-only discovery (do not substitute guessed region, instance or IP):
+
+```bash
+$ aws sts get-caller-identity
+$ aws ec2 describe-regions --query 'Regions[].RegionName' --output json
+$ aws ec2 describe-instances --region "$APPROVED_AWS_REGION" --filters Name=instance-state-name,Values=running --query 'Reservations[].Instances[].{Id:InstanceId,Image:ImageId,Type:InstanceType,PublicIP:PublicIpAddress,PublicDNS:PublicDnsName,Tags:Tags}' --output json
+$ aws route53 list-hosted-zones --query 'HostedZones[].{Id:Id,Name:Name}' --output json
+```
+
+Use only the authorized region/account and discovered instance; if multiple candidates cannot be resolved from tags and existing configuration, ask for that instance choice. Inspect its AMI and attached access configuration before selecting ubuntu. Configure SSH/SSM and destination grants through authorized environment settings; never retrieve, print or request private keys in chat. After the host checks above, use DEPLOYMENT.md for the dedicated private Compose setup. Do not alter an existing website's routing or public access rules without approval.

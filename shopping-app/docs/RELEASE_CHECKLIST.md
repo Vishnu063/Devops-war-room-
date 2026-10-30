@@ -1,14 +1,14 @@
 # Release checklist
 
-Local evidence: deployment-summary.json and application-qa-summary.json when present. A checked development gate never means a public deployment happened.
+Local evidence: deployment-summary.json, application-qa-summary.json and image-scans-verified.json. A checked development gate never means a public deployment happened.
 
 ## Internal preview
 
 - [ ] Review current application+main reconciliation and deployment PR.
-- [ ] Execute all current unit/API/SQL/browser/static/audit gates.
-- [ ] Build and scan pinned non-root images; verify no secrets in context/layers.
-- [ ] Verify Compose private ports, HTTPS authentication, secure cookies and disabled live/preview orders.
-- [ ] Verify backup upload/readback/restore and repeatable checksum migrations on disposable data.
+- [x] Execute current local unit/API/SQL/browser/static/audit gates (69/9/4, zero failures).
+- [x] Build and scan all4 pinned nonroot candidate images (zero reported vulnerabilities); generated secrets are outside context and tracked credential-pattern scan found no matches. Independent secret/security review remains required.
+- [x] Verify local Compose private ports, HTTPS authentication, secure cookies and disabled live/preview orders.
+- [x] Verify mock HTTPS backup upload/readback/restore and repeatable checksum migrations on disposable data.
 - [ ] Owner selects server/origin/access and approves any spending.
 - [ ] Inspect actual host capacity/ports/other sites without disturbing services.
 - [ ] Configure valid public certificate and test renewal, if publicly exposed.

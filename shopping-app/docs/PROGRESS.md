@@ -4,7 +4,7 @@ Current branch: `feat/novacart-deployment`; application baseline: `feat/novacart
 
 ## Deployment follow-up
 
-See [DEPLOYMENT_DELIVERY.md](DEPLOYMENT_DELIVERY.md) for current evidence: latest69 unit/API tests pass; prior full application run68 units,9 PostgreSQL scenarios and4 browser journeys pass;16 baseline container checks pass. Final patched-image retesting and remaining service scans are blocked by workspace disk. No AWS identity, public URL or production acceptance exists. New container/CI/migration/backup/monitoring artifacts do not complete roadmap release gates. The detailed application evidence below records the earlier commerce milestone.
+See [DEPLOYMENT_DELIVERY.md](DEPLOYMENT_DELIVERY.md) for current evidence:69 unit/API tests,9 PostgreSQL scenarios and4 browser journeys passed in a fresh full application run. All17 candidate container checks passed, including previous-image rollback/roll-forward. All4 exact candidate image scans reported zero vulnerabilities. Authorized unused BuildKit cleanup and bounded fresh image builds resolved local verification. AWS connection, public HTTPS, actual Actions, offserver backups/alerts and production acceptance remain external gaps. The detailed application evidence below records the earlier commerce milestone; release gates are not automatically completed by local tests.
 
 ## Verified outcome
 

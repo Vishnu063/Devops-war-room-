@@ -19,7 +19,12 @@ USER node
 EXPOSE 3100
 HEALTHCHECK --interval=15s --timeout=8s --start-period=20s --retries=3 CMD ["node","../deploy/scripts/health.mjs"]
 CMD ["node","--import","./runtime-env.mjs","server.mjs"]
-FROM ${POSTGRES_IMAGE} AS operations
+# Start PostgreSQL directly as its service user; no root privilege switch is needed.
+FROM ${POSTGRES_IMAGE} AS database
+RUN rm -f /usr/local/bin/gosu
+USER 70:70
+FROM database AS operations
+USER 0
 COPY --from=app /usr/local/bin/node /usr/local/bin/node
 COPY --from=dependencies --chown=1000:1000 /opt/novacart /opt/novacart
 WORKDIR /opt/novacart/backend

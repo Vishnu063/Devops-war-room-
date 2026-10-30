@@ -1,0 +1,48 @@
+{
+  "runId": "aa0ab10cc7f0",
+  "status": "VERIFIED_LOCAL_PREVIEW",
+  "checks": [
+    "Compose validation and private generated secrets",
+    "Previously built pinned images available",
+    "Release migration refuses missing verified backup",
+    "Encrypted pre-migration backup, authenticated HTTPS readback and fresh empty restore",
+    "Release migrations and checksums repeat safely without seeding",
+    "Explicit guarded fictional seed in owned disposable database only",
+    "Populated encrypted backup and restore with snapshot row-count comparison",
+    "Changed applied migration checksum is rejected",
+    "GCM authentication rejects tampered ciphertext with matching checksum before SQL",
+    "CA-verified HTTPS, preview authentication, security headers and real DB health",
+    "HTTP redirect uses canonical approved HTTPS origin",
+    "Secure cookies, customer-owner separation and disabled order acceptance",
+    "Non-root app, denied runtime DDL and no published app/database ports",
+    "Bounded concurrent HTTPS catalog smoke load",
+    "Optional internal HTTPS monitor observes authenticated database health",
+    "Controlled HTTPS outage fires and resolves local alert state; same-image recovery"
+  ],
+  "limitations": [
+    "Self-signed local TLS; HTTPS object-store mock is on the same Docker host. No real off-server provider, public deployment, certificate renewal or previous-version rollback verified."
+  ],
+  "dockerDriver": "vfs",
+  "availableWorkspaceMiB": 8329,
+  "imagesReused": true,
+  "basicLoad": {
+    "requests": 10,
+    "concurrency": 2,
+    "p95Ms": 42,
+    "scope": "Small unthrottled local TLS sample, not capacity certification"
+  },
+  "alertEvidence": {
+    "events": [
+      "firing",
+      "resolved"
+    ],
+    "scope": "Actual local HTTPS outage/recovery observations, no external webhook delivery"
+  },
+  "images": {
+    "app": "sha256:88205bea76703091ceecdf02e5d4dd89e9f0cc529cea1c43e4ba47f5a6870783",
+    "operations": "sha256:febd2edf762a3d4b27d9c4a338436ccbdeabf3f68682cb9fbf2ade75c3817543",
+    "nginx": "sha256:76513b33abbe19d03ddff3db74aafbe617f79a4708164e59ff372e3580dacf87"
+  },
+  "cleanup": "OWNED_PROJECT_REMOVED",
+  "finishedAt": "2026-10-30T09:18:01.143Z"
+}

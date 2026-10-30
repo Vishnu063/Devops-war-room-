@@ -1,0 +1,101 @@
+{
+  "assessmentDate": "2026-10-30",
+  "scanner": "Trivy 0.67.2",
+  "scope": "All four freshly built candidate images; local Docker image scan; no severity exclusions",
+  "images": [
+    {
+      "service": "app",
+      "image": "novacart-app:deployment-qa",
+      "imageID": "sha256:a2a865a78a06d94fb985f716a3f22e67b4997c8202d57ec74408d84e33560f1f",
+      "counts": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0,
+        "UNKNOWN": 0
+      },
+      "targets": [
+        {
+          "target": "novacart-app:deployment-qa (alpine 3.24.3)",
+          "type": "alpine",
+          "class": "os-pkgs"
+        },
+        {
+          "target": "Node.js",
+          "type": "node-pkg",
+          "class": "lang-pkgs"
+        }
+      ]
+    },
+    {
+      "service": "operations",
+      "image": "novacart-operations:deployment-qa",
+      "imageID": "sha256:f91c16deb8c8b349d659c9c2e7d13e19e2918a3acf3cc0664417bb986c939e26",
+      "counts": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0,
+        "UNKNOWN": 0
+      },
+      "targets": [
+        {
+          "target": "novacart-operations:deployment-qa (alpine 3.24.3)",
+          "type": "alpine",
+          "class": "os-pkgs"
+        },
+        {
+          "target": "Node.js",
+          "type": "node-pkg",
+          "class": "lang-pkgs"
+        }
+      ]
+    },
+    {
+      "service": "proxy",
+      "image": "novacart-nginx:deployment-qa",
+      "imageID": "sha256:2fe946c05add7f65fcd732e2389be9aa554ea563243dbf0ae0a939505b214856",
+      "counts": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0,
+        "UNKNOWN": 0
+      },
+      "targets": [
+        {
+          "target": "novacart-nginx:deployment-qa (alpine 3.24.3)",
+          "type": "alpine",
+          "class": "os-pkgs"
+        }
+      ]
+    },
+    {
+      "service": "database",
+      "image": "novacart-database:deployment-qa",
+      "imageID": "sha256:0ddee917ea78094b17189f94007af21e729b5ca205e0059180ef57eea34bb46b",
+      "counts": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0,
+        "UNKNOWN": 0
+      },
+      "targets": [
+        {
+          "target": "novacart-database:deployment-qa (alpine 3.24.3)",
+          "type": "alpine",
+          "class": "os-pkgs"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Scanner warns Alpine3.24 absent from its EOL lifecycle list; vulnerability analysis completed.",
+    "Reported zero findings is not a penetration test, public preview verification or production approval."
+  ],
+  "remediation": {
+    "operationsAndDatabase": "Removed unused Go-based gosu; database starts as postgres UID70, operations as1000.",
+    "proxy": "Removed unused optional modules and curl with offline apk removal; core TLS/HTTP retained."
+  }
+}

@@ -19,6 +19,7 @@ await mkdir(out, { recursive: true });
 const env = {
   ...process.env,
   APP_IMAGE: 'novacart-app:deployment-qa',
+  DATABASE_IMAGE: 'novacart-database:deployment-qa',
   OPERATIONS_IMAGE: 'novacart-operations:deployment-qa',
   NGINX_PROXY_IMAGE: 'novacart-nginx:deployment-qa',
 };
@@ -135,6 +136,7 @@ try {
     for (const [target, tag] of [
       ['app', env.APP_IMAGE],
       ['operations', env.OPERATIONS_IMAGE],
+      ['database', env.DATABASE_IMAGE],
     ]) {
       const args = ['build', '--target', target, '-t', tag];
       if (env.CODEX_PROXY_CERT) args.push('--secret', 'id=proxy_ca,src=' + env.CODEX_PROXY_CERT);
@@ -143,13 +145,18 @@ try {
     }
     docker('build', '-t', env.NGINX_PROXY_IMAGE, 'deploy/nginx');
   } else {
-    for (const tag of [env.APP_IMAGE, env.OPERATIONS_IMAGE, env.NGINX_PROXY_IMAGE])
+    for (const tag of [
+      env.APP_IMAGE,
+      env.OPERATIONS_IMAGE,
+      env.DATABASE_IMAGE,
+      env.NGINX_PROXY_IMAGE,
+    ])
       docker('image', 'inspect', tag);
   }
   pass(
     result.imagesReused
       ? 'Previously built pinned images available'
-      : 'Pinned app, operations and non-root proxy image builds',
+      : 'Pinned app, operations, database and non-root proxy image builds',
   );
   compose(['up', '-d', '--wait', 'novacart-db', 'backup-sink']);
   const admin = (await readFile(join(secrets, 'admin_url'), 'utf8')).trim();
@@ -182,12 +189,17 @@ try {
   });
   pass('Release migration refuses missing verified backup');
   async function snapshot() {
-    operation('../deploy/scripts/backup.mjs', [], { DATABASE_URL_FILE: '/run/secrets/backup_url' });
+    operation('../deploy/scripts/backup.mjs', [], {
+      DATABASE_URL_FILE: '/run/secrets/backup_url',
+    });
     const files = (await readdir(join(directory, 'backups')))
       .filter((n) => n.endsWith('.json'))
       .sort();
     const file = files.at(-1);
-    return { file, receipt: JSON.parse(await readFile(join(directory, 'backups', file), 'utf8')) };
+    return {
+      file,
+      receipt: JSON.parse(await readFile(join(directory, 'backups', file), 'utf8')),
+    };
   }
   const empty = await snapshot();
   sql('CREATE DATABASE novacart_restore_empty');
@@ -207,7 +219,10 @@ try {
   operation('release-migrate.mjs', [], migration);
   operation('release-migrate.mjs', [], migration);
   pass('Release migrations and checksums repeat safely without seeding');
-  operation('seed-demo.mjs', [], { NODE_ENV: 'development', CONFIRM_DEMO_SEED: 'yes' });
+  operation('seed-demo.mjs', [], {
+    NODE_ENV: 'development',
+    CONFIRM_DEMO_SEED: 'yes',
+  });
   pass('Explicit guarded fictional seed in owned disposable database only');
   const data = await snapshot();
   sql('CREATE DATABASE novacart_restore_data');
@@ -266,7 +281,9 @@ try {
     {
       expectFailure: true,
       rejection: 'Backup/restore failed',
-      extra: { RESTORE_DATABASE_URL: admin.replace(/\/novacart$/, '/novacart_restore_tamper') },
+      extra: {
+        RESTORE_DATABASE_URL: admin.replace(/\/novacart$/, '/novacart_restore_tamper'),
+      },
     },
   );
   if (
@@ -294,7 +311,10 @@ try {
             Host: 'localhost:' + port,
             ...(authenticate ? { Authorization: authorization } : {}),
             ...(body
-              ? { 'Content-Type': 'application/json', Origin: 'https://localhost:' + port }
+              ? {
+                  'Content-Type': 'application/json',
+                  Origin: 'https://localhost:' + port,
+                }
               : {}),
             ...(cookie ? { Cookie: cookie } : {}),
           },
@@ -303,7 +323,11 @@ try {
           let data = '';
           res.on('data', (b) => (data += b));
           res.on('end', () =>
-            resolve({ status: res.statusCode, headers: res.headers, body: data }),
+            resolve({
+              status: res.statusCode,
+              headers: res.headers,
+              body: data,
+            }),
           );
         },
       );
@@ -383,7 +407,10 @@ try {
     if (binding && Object.keys(binding).length)
       throw new Error('Private service publishes host ports');
   }
-  pass('Non-root app, denied runtime DDL and no published app/database ports');
+  if (compose(['exec', '-T', 'novacart-db', 'id', '-u']) !== '70')
+    throw new Error('Database must run as postgres');
+  compose(['exec', '-T', 'novacart-db', 'sh', '-c', 'test ! -e /usr/local/bin/gosu']);
+  pass('Non-root app/database, denied runtime DDL and no published app/database ports');
   const timings = [];
   for (let i = 0; i < 5; i++)
     await Promise.all(
@@ -439,7 +466,61 @@ try {
     scope: 'Actual local HTTPS outage/recovery observations, no external webhook delivery',
   };
   pass('Controlled HTTPS outage fires and resolves local alert state; same-image recovery');
+  const previousImage = process.argv
+    .find((value) => value.startsWith('--rollback-image='))
+    ?.split('=')[1];
+  if (previousImage) {
+    if (!/^sha256:[0-9a-f]{64}$/.test(previousImage))
+      throw new Error('Rollback fixture must be a full local image ID');
+    if (
+      docker('image', 'inspect', previousImage, '--format', '{{.Config.WorkingDir}}') !==
+      '/opt/novacart/backend'
+    )
+      throw new Error('Rollback fixture is not a NovaCart image');
+    const candidate = env.APP_IMAGE;
+    const candidateId = docker('image', 'inspect', candidate, '--format', '{{.Id}}');
+    if (previousImage === candidateId)
+      throw new Error('Rollback fixture must be a different version');
+    async function switchVersion(image) {
+      env.APP_IMAGE = image;
+      compose(['up', '-d', '--no-deps', '--wait', 'novacart-app']);
+      compose(['restart', 'nginx']);
+      let available = false;
+      for (let attempt = 0; attempt < 30; attempt++) {
+        try {
+          if ((await https('/api/health')).status === 200 && (await https('/')).status === 200) {
+            available = true;
+            break;
+          }
+        } catch {
+          // The restarted owned proxy must open its listener before smoke requests.
+        }
+        await wait(500);
+      }
+      if (!available) throw new Error('Version switch smoke failed');
+      if ((await https('/api/orders', { method: 'POST', cookie, body: {} })).status !== 503)
+        throw new Error('Version switch enabled orders');
+    }
+    await switchVersion(previousImage);
+    await switchVersion(candidate);
+    result.rollbackEvidence = {
+      previousImage,
+      candidateImage: candidateId,
+      scope:
+        'Actual local previous-image rollback and roll-forward on compatible disposable schema; no production rollback or down-migration',
+    };
+    pass(
+      'Previous-image rollback and candidate roll-forward preserve HTTPS health and disabled commerce',
+    );
+    result.limitations = result.limitations.map((item) =>
+      item.replace(
+        ' or previous-version rollback verified',
+        ' verified; previous-image rollback is local only',
+      ),
+    );
+  }
   result.images = {
+    database: docker('image', 'inspect', env.DATABASE_IMAGE, '--format', '{{.Id}}'),
     app: docker('image', 'inspect', env.APP_IMAGE, '--format', '{{.Id}}'),
     operations: docker('image', 'inspect', env.OPERATIONS_IMAGE, '--format', '{{.Id}}'),
     nginx: docker('image', 'inspect', env.NGINX_PROXY_IMAGE, '--format', '{{.Id}}'),

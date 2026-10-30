@@ -1,6 +1,6 @@
 {
-  "runId": "9633d5dfe669e1cb",
-  "startedAt": "2026-10-30T04:45:33.559Z",
+  "runId": "0ec16834d1b5a2b1",
+  "startedAt": "2026-10-30T09:14:21.107Z",
   "status": "VERIFIED_LOCAL",
   "checks": {
     "static-checks": {
@@ -8,8 +8,8 @@
     },
     "unit": {
       "exitCode": 0,
-      "tests": 68,
-      "passed": 68,
+      "tests": 69,
+      "passed": 69,
       "skipped": 0
     },
     "postgresql": {
@@ -50,21 +50,21 @@
   "localPerformance": [
     {
       "viewport": 1280,
-      "domContentLoadedMs": 209,
+      "domContentLoadedMs": 185,
       "transferBytes": 63569,
       "scope": "Unthrottled loopback Chromium; not a production performance SLO"
     },
     {
       "viewport": 390,
-      "domContentLoadedMs": 178,
+      "domContentLoadedMs": 187,
       "transferBytes": 62783,
       "scope": "Unthrottled loopback Chromium; not a production performance SLO"
     }
   ],
   "browser": "Chromium 154.0.8037.57 built on Debian GNU/Linux 13 (trixie)",
-  "nodePeakRss": "89488 kB",
-  "databaseResourceSample": "66.03MiB / 256MiB | 0.33%",
+  "nodePeakRss": "89244 kB",
+  "databaseResourceSample": "66.43MiB / 256MiB | 0.04%",
   "cleanup": "OWNED_RESOURCES_REMOVED",
-  "finishedAt": "2026-10-30T04:46:11.912Z",
+  "finishedAt": "2026-10-30T09:15:15.056Z",
   "nodeVersion": "v24.19.0"
 }

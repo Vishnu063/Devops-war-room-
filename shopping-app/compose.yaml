@@ -1,7 +1,13 @@
 name: novacart-preview
 services:
   novacart-db:
-    image: ${POSTGRES_IMAGE:-postgres:16.15-alpine@sha256:0cefaabd882e42bcb2a2f3dc56d3ce4770560ba62fd7f197f1a2e008fd5731ab}
+    image: ${DATABASE_IMAGE:-novacart-database:local}
+    build:
+      context: .
+      target: database
+    user: '70:70'
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
     environment:
       POSTGRES_DB: novacart
       POSTGRES_USER: postgres
